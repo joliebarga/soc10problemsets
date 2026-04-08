@@ -8,12 +8,10 @@ output: pdf_document
 ```{r header2}
 #####################################################
 ## title: second problem set!
-## author: you!
+## author: Jolie Barga
 ## purpose: to try out R
-## date: today's date
+## date: April 8, 2026
 #####################################################
-
-# you can start coding below
 
 ```
 
