@@ -56,10 +56,10 @@ add_line(df1)
 ```{r q3, echo = TRUE}
 
 # write code for question 3 here!
-resources_df <- data.frame("resource name" = c("All Our Ideas"), 
-                       "link" = c("https://allourideas.org/"),
-                       "custom_ready" = c("custom made"),
-                       "description" = c("All Our Ideas is a wiki survey that asks participants to compare two items (e.g. which is better, Stanford or Cal?) at a time. The respondents' answers are then aggregated so that each answer has a win percentage, and the surveyor can rank a large number of items. Respondents can also add their own ideas (answers) to the survey. This is useful for doing surveys on large or ambiguous questions, where the researcher might not know the best answers and it may be hard to compare all at once, but where there is a definitive underlying ranking."))
+resources_df <- data.frame("resource name" = c("All Our Ideas", "Pew Research Center"), 
+                       "link" = c("https://allourideas.org/", "https://www.pewresearch.org/datasets/"),
+                       "custom_ready" = c("custom made", "previously collected"),
+                       "description" = c("All Our Ideas is a wiki survey that asks participants to compare two items (e.g. which is better, Stanford or Cal?) at a time. The respondents' answers are then aggregated so that each answer has a win percentage, and the surveyor can rank a large number of items. Respondents can also add their own ideas (answers) to the survey. This is useful for doing surveys on large or ambiguous questions, where the researcher might not know the best answers and it may be hard to compare all at once, but where there is a definitive underlying ranking.", "Pew Research Center collects data on a wide range of topics from healthcare, AI, politics, and social opinions and is collected primarily via survey data. These are heavily large-scale datsets ranging from the entire United States to International surveys. This is a relevant resource to use for data sources as this data source is free, features a wide variety of social science topics, and is relevant for understanding human behavior and experiances from a social context."))
 
 ```
 
