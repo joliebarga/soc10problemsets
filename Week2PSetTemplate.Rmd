@@ -16,11 +16,11 @@ output: pdf_document
 ```
 
 
+
 On GitHub, create a new __repository__ called "soc10problemsets" (or something similar). Then upload the "Week2PSetTemplate.Rmd" file (you can download it here [here](https://github.com/Soc10Spring2026/soc10problemsets_templates)). Make Tyler (`tylermcdaniel`) and Yao (`yao-mxu`) "collaborators" in this repository so we can see your work (Settings -> Collaborators -> Add People). Add your name and the date to the top of the file, save your changes, and __commit__ them. (note: You can do this online, but I recommend using GitHub Desktop!).
 
 
-Done with question 1!
-
+Link to my repository: https://github.com/joliebarga/soc10problemsets
 
 
 2. In the space below, set "eval = TRUE" and try running the first code chunk. Then fix the error. On your local file, __commit__ the file to your GitHub.  
