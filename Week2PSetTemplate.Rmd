@@ -25,10 +25,10 @@ Done with question 1!
 
 2. In the space below, set "eval = TRUE" and try running the first code chunk. Then fix the error. On your local file, __commit__ the file to your GitHub.  
 
-[Text answer for question 2 here]
+I fixed the error below.
 
-```{r q2, echo = TRUE, eval = FALSE}
-
+```{r q2, echo = TRUE, eval = TRUE}
+library(dplyr)
 # this is an initial dataframe
 df1 <- data.frame("resource name" = "a",
                   "custom_ready" = "b")
@@ -36,9 +36,9 @@ df1 <- data.frame("resource name" = "a",
 
 # we want to add observations to it (c, and d)
 # something is wrong with the following function - can you fix it?
-add_line <- function(dataframe, new_dataframe){
+add_line <- function(dataframe){
   
-  new_dataframe -> data.frame("resource" = "c",
+  new_dataframe <- data.frame("resource.name" = "c",
                               "custom_ready" = "d")
   
   bind_rows(dataframe, new_dataframe)
