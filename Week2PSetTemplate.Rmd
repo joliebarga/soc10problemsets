@@ -70,7 +70,6 @@ My text answers for this question will follow my graphd.
 ```{r q4, echo = TRUE}
 
 library(gtrendsR)
-library(ggplot2)
 
 data_social_all <- gtrends(c("cat adoption"), 
                   geo = c("US"), time = "all")
