@@ -1,6 +1,6 @@
 ---
 title: "Week 3 Problem Set"
-author: "Jolie Barga (github link here)"
+author: "Jolie Barga (https://github.com/joliebarga/soc10problemsets)"
 date: "April 19 2026"
 output: pdf_document
 ---
@@ -48,6 +48,7 @@ library(RCurl)
 library(ggplot2)
 library(tidyr)
 library(magrittr)
+library(dplyr)
 
 # input url from github
 url <- getURL("https://raw.githubusercontent.com/tylermcdaniel/soc10/refs/heads/deployment/Data/ca_dem_table.csv")
@@ -60,10 +61,7 @@ ca_dem_table <- read_csv(url)
 ca_dem_table %<>%
   pivot_longer(cols = -c(Race),
                names_to = "Name",
-               values_to = "Value")
-
-# filter so only percentages and remove Total
-ca_dem_table %<>%
+               values_to = "Value") %>%
   filter(Name == "2000_pct" | Name == "2010_pct" | Name == "2020_pct") %>%
   filter(Race != "Total")
 
@@ -114,7 +112,11 @@ ggplot(data = gapminder_2007,
 
 5. Find a data visualization in the wild! It could be in the news, from an academic article, or somewhere else. Include an image of it using the `knitr::include_graphics("")` function. Describe its positive and negative aspects. __Commit__ your changes. 
 
-[Text answer for question 5 here]
+This visualization comes from the Pew Research Center and shows the percentage of regular audiences of 30 major U.S. news sources who have a college degree or more.
+
+Positive aspects: The chart is very easy to read and makes comparisons across news sources simple and the use of a single consistent color with a clear reference line showing the national average of 36% is an effective use of scale, allowing the viewer to immediately see which outlets skew toward more or less educated audiences. The dot on each bar clearly marks the national average for easy comparison, and the percentage labels on each bar make the data precise and readable. The title clearly communicates the main finding so the viewer knows exactly what they are looking at.
+
+Negative aspects: The chart does not tell us anything about why these differences exist or what they mean sociologically. It also does not account for the size of each outlet's audience so a smaller outlet like The Atlantic having 62% college graduates may reflect a much smaller and more selective readership than a large outlet like Fox News. Additionally, the chart only measures one demographic characteristic, leaving out other important factors like age, income, or political affiliation that might better explain news consumption patterns and influence media significantly.
 
 
 ```{r q5, echo = TRUE}
