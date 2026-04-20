@@ -1,7 +1,7 @@
 ---
 title: "Week 3 Problem Set"
-author: "Your Name Here! (github link here)"
-date: "Date goes Here!"
+author: "Jolie Barga (github link here)"
+date: "April 19 2026"
 output: pdf_document
 ---
 
@@ -11,7 +11,11 @@ output: pdf_document
 
 ```{r q1, echo = TRUE}
 
+library(gapminder)
+library(ggplot2)
 
+ggplot(gapminder, aes(x = gdpPercap, y = lifeExp)) +
+  geom_point()
 
 ```
 
