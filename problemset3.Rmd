@@ -22,11 +22,18 @@ ggplot(data = gapminder,
 
 2. Now, modify your plot! For each change that you make, explain your decision, in terms of the visual elements. __Commit__ your changes. 
 
-[Text answer for question 2 here]
+I made four changes to the original plot. First, I added color = continent to distinguish between continents, making it easier to see regional patterns rather than looking at all countries as one group. Second, I added alpha = 0.5 to make the points slightly transparent since there are many overlapping points, making the plot less cluttered and easier to read. Third, I added labels using labs() to give the plot a clear title and axis labels so the viewer knows exactly what they are looking at. Fourth, I changed the theme to theme_minimal() to remove the grey background and make the plot cleaner and easier to read. I use ggplot quite frequently in my lab on campus, so I felt the skills I used combined with what we've learned in class made this plot unique to complete and analyze.
 
 ```{r q2, echo = TRUE}
 
-
+ggplot(data = gapminder,
+       mapping = aes(x = year, y = lifeExp, color = continent)) +
+  geom_point(alpha = 0.5) +
+  labs(title = "Life Expectancy Over Time by Continent",
+       x = "Year",
+       y = "Life Expectancy",
+       color = "Continent") +
+  theme_minimal()
 
 ```
 
@@ -38,6 +45,9 @@ ggplot(data = gapminder,
 
 library(readr)
 library(RCurl)
+library(ggplot2)
+library(tidyr)
+library(magrittr)
 
 # input url from github
 url <- getURL("https://raw.githubusercontent.com/tylermcdaniel/soc10/refs/heads/deployment/Data/ca_dem_table.csv")
