@@ -83,13 +83,32 @@ ggplot(ca_dem_table, aes(x = Name, y = Value)) +
 
 4. Return to a dataset you have worked with in this class already (for example, hand-collected data, data using the `data()` function. The `gtrendsR` data could also work but may need some cleaning/manipulation). Use `ggplot()` to plot this data in a new way. Describe whether the viewer learns anything new from seeing the data in this way. __Commit__ your changes.  
 
-[Text answer for question 4 here]
+I replotted the gapminder data from Questions 1 and 2 in a new way by filtering to only the year 2007 and adding two additional variables which are population size shown through the size of each point and continent shown through color. This gives the viewer significantly more information than the simple scatter plots in Q1 and Q2. 
+
+The viewer can now see several important trends simultaneously. First, there is a clear positive relationship between GDP per capita and life expectancy, meaning that countries with higher economic output tend to have longer life expectancy, likely due to better access to healthcare, nutrition, and infrastructure. Second, by adding continent as a color, we can see that countries in Africa tend to cluster at the lower end of both GDP per capita and life expectancy, reflecting the lasting economic impacts of colonialism and historical inequalities in global resource distribution. Countries in Europe and the Americas tend to cluster at higher levels of both variables. Third, the size of each point reveals population differences — large population countries like China and India fall in the middle range of GDP per capita but have seen significant improvements in life expectancy, reflecting rapid economic development and public health investments in the latter half of the 20th century.
 
 ```{r q4, echo = TRUE}
 
-# write code for question 4 here!
+library(gapminder)
+library(ggplot2)
+library(dplyr)
+library(magrittr)
 
+# filter to only 2007 data
+gapminder_2007 <- gapminder %>%
+  filter(year == 2007)
 
+# plot
+ggplot(data = gapminder_2007,
+       mapping = aes(x = gdpPercap, y = lifeExp,
+                     size = pop, col = continent)) +
+  geom_point(alpha = 0.7) +
+  labs(title = "GDP Per Capita vs Life Expectancy in 2007",
+       x = "GDP Per Capita",
+       y = "Life Expectancy",
+       size = "Population",
+       col = "Continent") +
+  theme_minimal()
 ```
 
 
