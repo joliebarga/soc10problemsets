@@ -119,6 +119,7 @@ ggplot(data = gapminder_2007,
 
 ```{r q5, echo = TRUE}
 
-#knitr::include_graphics("")
+knitr::include_graphics("graph.png")
+
 
 ```
