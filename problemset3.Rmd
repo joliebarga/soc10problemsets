@@ -39,7 +39,7 @@ ggplot(data = gapminder,
 
 3. Use the code provided to load data on racial compositions in California. Then create your own visualization! Try to make it different than what is done above. Is there anything that you want to change, but are unable to? Describe what you want to communicate with these data. __Commit__ your changes. 
 
-[Text answer for question 3 here]
+I created a faceted bar chart showing the percentage of each racial group in California across 2000, 2010, and 2020, with one panel per racial group. I wanted to communicate how California's racial composition has shifted over two decades. The most notable trends are that the White alone population has steadily declined from around 47% to 35%, while the Hispanic or Latino population has grown significantly. Asian populations have also grown slightly over time. One thing I wanted to change but was unable to was clearly showing the very small groups like Native American and Pacific Islander alongside larger groups, since their bars are nearly invisible at the same scale. I was however proud I was able to fix the facet label cutoff issue by using label_wrap_gen(width = 20) through researching more on ggplot and sizing of labels.
 
 ```{r q3, echo = TRUE, message = FALSE}
 
@@ -55,6 +55,29 @@ url <- getURL("https://raw.githubusercontent.com/tylermcdaniel/soc10/refs/heads/
 # download wikipedia data (from github)
 ca_dem_table <- read_csv(url)
 
+
+# pivot longer
+ca_dem_table %<>%
+  pivot_longer(cols = -c(Race),
+               names_to = "Name",
+               values_to = "Value")
+
+# filter so only percentages and remove Total
+ca_dem_table %<>%
+  filter(Name == "2000_pct" | Name == "2010_pct" | Name == "2020_pct") %>%
+  filter(Race != "Total")
+
+# plot
+ggplot(ca_dem_table, aes(x = Name, y = Value)) +
+  geom_bar(position = "dodge", stat = "identity",
+           aes(fill = Name)) +
+  labs(x = "", y = "Percentage of Population",
+       title = "Racial Composition of California Over Time") +
+  theme_minimal() +
+  theme(axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        legend.position = "bottom") +
+  facet_wrap(~Race, labeller = label_wrap_gen(width = 20))
 
 ```
 
