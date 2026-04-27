@@ -80,11 +80,41 @@ privacy, consent, and data security.
 
 3. Gather the data from [this Wikipedia page on incarceration in the US](https://en.wikipedia.org/wiki/Incarceration_in_the_United_States) (you can use the code from Section 4 of the course website to gather this). Use `mutate()`, `parse_number()` from the `readr` package, and the magrittr pipe (`%<>%`) to fix the issue with the `Count` variable. Then plot the Count variable over time with `ggplot()`. __Commit__ your changes.
 
-[Use mutate and parse_number to create a new variable or modify the Count variable (1 point). Correctly use the magrittr pipe (0.5 points). The resulting plot should show the correct y axis for the incarceration data (0.5 points).]
+I gathered the incarceration data from Wikipedia using rvest and then 
+used mutate() and parse_number() to fix the Count variable, which was 
+stored as a character with commas rather than as a numeric value. The 
+plot shows that incarceration counts in the US increased dramatically 
+from 1940 through the 2000s before beginning to decline slightly in 
+recent years.
 
 ```{r q3, echo = TRUE, message = FALSE}
 
+library(rvest)
+library(dplyr)
+library(magrittr)
+library(readr)
+library(ggplot2)
 
+us_inc <- read_html("https://en.wikipedia.org/wiki/Incarceration_in_the_United_States")
+
+us_inc_table <- html_nodes(us_inc,
+                            xpath = '//*[@id="mw-content-text"]/div[2]/div[5]/table')
+
+us_inc_table %<>%
+  html_table()
+
+us_inc_table %<>%
+  as.data.frame()
+
+us_inc_table %<>%
+  mutate(Count = parse_number(Count))
+
+ggplot(us_inc_table, aes(x = Year, y = Count)) +
+  geom_point() +
+  labs(title = "US Incarceration Count Over Time",
+       x = "Year",
+       y = "Count") +
+  theme_minimal()
 
 ```
 
