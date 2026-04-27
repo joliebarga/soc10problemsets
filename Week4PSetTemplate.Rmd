@@ -51,7 +51,31 @@ ca_race <- get_decennial(
 
 2. In Bit by Bit, Salganik describes several possibilities and challenges of survey data in the digital age. Do you think any of these have changed since 2017 (when the book was written)? Pick a new type of survey or data collection, and describe its current possibilities and limitations. __Commit__ your changes. 
 
-[Identify at least one of the methods Salganik describes and how this may have changed (1 point). Pick a reasonable new type of survey or data collection, and describe both its possibilities (0.5 points) and limitations (0.5 points).]
+In Bit by Bit, Salganik discusses the rise of smartphone surveys as a 
+new method for reaching hard-to-reach populations and collecting 
+real-time data and one example he highlights is thee study of formerly 
+incarcerated men, where smartphones were used to administer daily surveys 
+tracking well-being and employment searches after prison release which we discussed in class. While 
+this was groundbreaking in 2017, digital data collection 
+has shifted dramatically due to tech and ai advancements. 
+
+One major change is the rise of data collection through wearable 
+technology like Apple Watches, Fitbits, and Oura Rings. Rather than 
+asking people questions, researchers can now continuously collect 
+biometric data like heart rate, sleep patterns, stress levels, and 
+physical activity without any active participation from the respondent 
+after initial consent. Stanford researchers are even is currently conducting a study on Oura Ring usage on college students.
+One possiblity this has is that since this method is always-on and non-reactive in the same way 
+Salganik describes big data, people often forget they are being monitored and 
+behave naturally so therefore wearable tech can capture data that people cannot accurately self-
+report, like exact sleep duration or stress responses to daily events, 
+which traditional surveys rely on memory and self-perception for. This 
+opens up entirely new research questions in medical sociology, mental 
+health research, and the study of inequality in physical health outcomes. A limitation is wearables are expensive and disproportionately owned by 
+wealthier and younger populations, making samples highly non-
+representative and therefore, like the Stanford study, require the researchers to provide the wearable technology as its not frquent people own it already. The data is also extremely sensitive since 
+information collected from these is deeply personal and raises serious ethical concerns around 
+privacy, consent, and data security. 
 
 
 3. Gather the data from [this Wikipedia page on incarceration in the US](https://en.wikipedia.org/wiki/Incarceration_in_the_United_States) (you can use the code from Section 4 of the course website to gather this). Use `mutate()`, `parse_number()` from the `readr` package, and the magrittr pipe (`%<>%`) to fix the issue with the `Count` variable. Then plot the Count variable over time with `ggplot()`. __Commit__ your changes.
