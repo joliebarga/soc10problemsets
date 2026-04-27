@@ -1,16 +1,51 @@
 ---
 title: "Week 4 Problem Set"
-author: "Your Name Here! (github link here)"
-date: "Date goes Here!"
+author: "Jolie Barga (github link here)"
+date: "April 26 2026"
 output: pdf_document
 ---
 
 1. Start a new document, problemset4.Rmd, in your soc10problemsets repository. (You can download a template [here](https://github.com/Soc10Spring2026/soc10problemsets_templates), but be sure to save it in your own soc10problemsets repo). In the chunk below, show how you would gather data on California's ethnoracial demographics for 2020 using `tidycensus`. (Note: in the chunk below, `eval` is set to false, so you won't see any results. That is ok! Just show the code. And remove your personal key). __Commit__ your changes.
 
-[Note: the scoring guidelines in brackets can be deleted before submitting. Library the correct package (0.5 points), use the correct function (0.5) to gather the correct data on race for 2020 (0.5 points). Additional note: there is no single correct racial variable, there are many to choose from. Ideally, make a choice and justify it.]
+To gather California's ethnoracial demographics for 2020, I used the 
+tidycensus package which provides a way to access U.S. 
+Census data directly in R and I chose get_decennial() over get_acs() 
+because the decennial census is conducted every 10 years and provides 
+exact population counts rather than estimates with margins of error, 
+making it the most accurate source for racial demographic data for 2020.
+
+I selected five racial variables from the 2020 Decennial Census 
+demographic file: White alone (P2_005N), Black or African American 
+alone (P2_006N), Asian alone (P2_008N), Hispanic or Latino (P2_002N), 
+and Native American (P2_007N). I chose these five groups because they 
+represent the major ethnoracial groups in California and align with the 
+racial categories used in the ca_dem_table data we worked with in 
+Problem Set 3, allowing for consistency across assignments. I used 
+geography = "county" to get a breakdown by California county, which 
+provides more exact demographic information than a single statewide 
+estimate.
 
 ```{r q1, echo = TRUE, eval = FALSE}
 
+library(tidycensus)
+library(tidyverse)
+
+census_api_key("my_key")
+
+# ca ethnoracial demographics for 2020
+ca_race <- get_decennial(
+  geography = "county",
+  variables = c(
+    White = "P2_005N",
+    Black = "P2_006N",
+    Asian = "P2_008N",
+    Hispanic = "P2_002N",
+    Native_American = "P2_007N"
+  ),
+  state = "CA",
+  year = 2020,
+  sumfile = "dhc"
+)
 
 ```
 
