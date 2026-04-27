@@ -144,5 +144,29 @@ ggplot(us_inc_table, aes(x = Year, y = Count)) +
 
 5. Would a linear or non-linear model be more appropriate for explaining and predicting trends in US society and incarceration? Explain the benefits and drawbacks of each. __Commit__ your changes.  
 
-[Make a defensible argument about the data trend (1 point). Identify benefits (1 point) and drawbacks (1 point) of both linear and nonlinear models.]
+Looking at the incarceration data, I think a non-linear model is more 
+appropriat because he count rose sharply from around 264,000 in 1940 to over 
+2.3 million in 2008 and then declined to around 1.7 million by 2020. 
+That kind of curve with a clear peak cannot be captured by a straight 
+line without removing key data points and necesarry info.
+
+A linear model has the benefit of being simple and easy to interpret because 
+the slope gives a clear number for how much incarceration changes 
+per year, which makes it easy to communicate findings and make basic 
+predictions. However the drawback is that it assumes a constant rate of 
+change, which does not match this data at all. A linear model would 
+predict incarceration keeps rising indefinitely, which we can see from 
+the data is not what actually happened after 2008.
+
+A non-linear model like the model we used in class has the benefit 
+of following the actual shape of the data much more closely, capturing 
+both the rapid rise through the 1990s and the decline after 2008. This 
+gives a much more honest and accurate description of the trend. The 
+drawback is that non-linear models are harder to interpret since there 
+is no single slope value, and they can overfit the data by following 
+small bumps and dips too closely, which makes future predictions less 
+reliable and harder to determine.
+
+
+
 
