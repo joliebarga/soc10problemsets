@@ -120,11 +120,25 @@ ggplot(us_inc_table, aes(x = Year, y = Count)) +
 
 4. Now model it! Add a linear model of incarceration over time to your plot. (Note: If you are unable to plot question 3 correctly, you can plot `Rate` as the outcome for this question). __Commit__ your changes.  
 
-[Add the correct layer to the plot (0.5 points), with the correct method specified (0.5 points). The plot should be correctly formatted (0.5 points).]
+I added a linear model to my incarceration plot from Q3 using 
+geom_smooth() with method = "lm" which fits a line of best fit through 
+the data points. I can see from the plot that the linear model shows an 
+overall upward trend in incarceration counts over time, however I notice 
+it does not perfectly capture what is actually happening in the data. 
+The counts rose very sharply through the 1980s and 1990s and then began 
+to decline after around 2008, which a straight line cannot fully 
+represent. This makes me think a non-linear model might actually fit 
+this data better, which I will explore in Q5.
 
 ```{r q4, echo = TRUE}
 
-
+ggplot(us_inc_table, aes(x = Year, y = Count)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(title = "US Incarceration Count Over Time with Linear Model",
+       x = "Year",
+       y = "Count") +
+  theme_minimal()
 ```
 
 
