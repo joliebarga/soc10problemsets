@@ -81,11 +81,19 @@ ggplot(data = santa_clara, aes(fill = estimate)) +
 
 3. Use the `tigris` function to download spatial data for counties in California. Plot the data using `ggplot()`. __Commit__ your changes. 
 
-[Use tigris to gather boundaries at the correct geometries (0.5 points). Plot the data correctly (0.5 points).]
 
 ```{r q3, echo = TRUE, message = FALSE}
 
+library(tigris)
+library(ggplot2)
 
+counties <- counties(state = "CA")
+
+# plot counties
+ggplot(counties)+
+  geom_sf()+
+  labs(title = "California Counties") +
+  theme_minimal()
 
 ```
 
