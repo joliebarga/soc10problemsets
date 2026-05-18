@@ -1,6 +1,6 @@
 ---
 title: "Week 5 Problem Set"
-author: "Jolie Barga (github link here)"
+author: "Jolie Barga https://github.com/joliebarga/soc10problemsets"
 date: "May 9 2026"
 output: pdf_document
 ---
