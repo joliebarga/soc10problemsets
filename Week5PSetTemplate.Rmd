@@ -180,5 +180,28 @@ ggplot(counties)+
 
 5. Does the county-level air quality map accurately represent how people experience air quality? Is the Modifiable Areal Unit Problem something that we should be concerned with? __Commit__ your changes. 
 
-[Make a defensible argument about the data's representativeness (0.5 points). Make a defensible argument about the MAUP (1 point). ]
+I don't think the county-level air quality map accurately represents 
+how people actually experience air quality. Counties in California are 
+really large and there is a lot of variation within a single county so
+someone living right next to a highway or industrial facility or oil plant or farm in Fresno 
+experiences very different air quality than someone living on the 
+outskirts of the same county in a more healthy condition. By averaging PM2.5 levels across an 
+entire county we lose that within-county variation which I think could 
+be masking some of the worst pollution exposure that specific 
+communities face so showing the variability is important.
+
+I do think the Modifiable Areal Unit Problem is something we should 
+be concerned with here because the way we draw boundaries can significantly 
+change our findings and if we had used census tracts or block groups 
+instead of counties we would likely see much more dramatic differences 
+in air quality across space, particularly in urban areas where pollution 
+sources like highways and factories tend to be concentrated in specific 
+neighborhoods and not entire cities or counties. Using counties smooths over these differences and could 
+lead us to underestimate how unequally air pollution is distributed. 
+A county like Los Angeles for example contains both very clean and very 
+polluted areas and averaging these together gives a misleading picture 
+of what residents are actually breathing as it varies by neigborhood signicantly. I feel that choosing a smaller 
+and more meaningful units like census tracts would give a much more 
+accurate and socially relevant picture of air quality inequality and 
+better reflect the environmental injustice patterns I described in Q4.
 
