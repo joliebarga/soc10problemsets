@@ -1,6 +1,6 @@
 ---
 title: "Week 5 Problem Set"
-author: "Your Name Here! (github link here)"
+author: "Jolie Barga (github link here)"
 date: "Date goes Here!"
 output: pdf_document
 ---
@@ -8,11 +8,31 @@ output: pdf_document
 
 1. Start a new document, problemset5.Rmd, in your soc10problemsets repository. (You can download a template [here](https://github.com/Soc10Spring2026/soc10problemsets_templates), but be sure to save it in your own soc10problemsets repo). Read the North Carolina shapefile into R using the process described in section \@ref(using-simple-features-in-r). Then plot the data using `ggplot2`. Use a variable other than `AREA` to fill the shapes, and try using one of the `scale_fill_` arguments to create a red color scale. See [these notes on color scales with ggplot](https://ggplot2-book.org/scales-colour.html) for some theory and ideas here. __Commit__ your changes. 
 
-[Note: the scoring guidelines in brackets can be deleted before submitting. Load the nc data (0.5 points), use the correct function (0.5) and plot using ggplot2 with a variable other than AREA (1 point). Use scale_fill to create a red color scale (0.5 points).]
+
+
+I loaded the North Carolina shapefile using st_read() and plotted it 
+using ggplot() and geom_sf(). Instead of using AREA to fill the shapes 
+like the class example, I used PERIMETER which shows how the boundary 
+length varies across counties in the state. I used scale_fill_gradient() 
+with pink and darkred to create a red color scale where darker red 
+counties have longer perimeters. I noticed that coastal counties tend 
+to have longer perimeters which makes sense given their irregular 
+coastline boundaries compared to inland counties.
 
 ```{r q1, echo = TRUE}
 
+library(sf)
+library(ggplot2)
 
+# north carolina file
+nc <- st_read(system.file("shape/nc.shp", package="sf"))
+
+ggplot(nc)+
+  geom_sf(aes(fill = PERIMETER))+
+  scale_fill_gradient(low = "pink", high = "darkred")+
+  labs(title = "North Carolina Counties by Perimeter",
+       fill = "Perimeter")+
+  theme_minimal()
 ```
 
 2. Use the `tidycensus` function to download income data for block groups in Santa Clara County. Plot the demographic data using `ggplot()` and comment on what it shows. __Commit__ your changes. 
