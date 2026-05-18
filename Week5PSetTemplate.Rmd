@@ -1,7 +1,7 @@
 ---
 title: "Week 5 Problem Set"
 author: "Jolie Barga (github link here)"
-date: "Date goes Here!"
+date: "May 9 2026"
 output: pdf_document
 ---
 
@@ -38,8 +38,46 @@ ggplot(nc)+
 2. Use the `tidycensus` function to download income data for block groups in Santa Clara County. Plot the demographic data using `ggplot()` and comment on what it shows. __Commit__ your changes. 
 
 
-[Download data for a correct variable in the correct geographies (1 point). Plot the map with ggplot (0.5 points). Describe findings accurately (0.5 points).]
+I used get_acs() to download median household income data for block 
+groups in Santa Clara County for 2020. Looking at the map, there is 
+a lot of variation in income across the county. The large eastern and 
+southeastern portions of the county show very high incomes in the 
+$150,000-$250,000 range shown in the lighter purple and pink tones, 
+which likely corresponds to the wealthier hillside and tech corridor 
+areas. The more densely populated central and western areas around 
+San Jose show much more variation, with darker purple and black areas 
+indicating lower incomes around $50,000 or below sitting right next 
+to lighter areas with much higher incomes. The gray areas represent 
+block groups where data was not available. This pattern reflects the 
+well known economic inequality in the Bay Area where being close to 
+tech hubs and the high cost of housing create really stark differences 
+in income even across very short distances.
 
+```{r q2, echo = TRUE, message = FALSE}
+
+library(tidycensus)
+library(ggplot2)
+
+census_api_key("ffea6c5d2bcdc3c8fdf9ff3f6aa412b711e54559")
+
+# Santa Clara County
+santa_clara <- get_acs(
+  state = "CA",
+  county = "Santa Clara",
+  geography = "block group",
+  variables = "B19013_001",
+  geometry = TRUE,
+  year = 2020)
+
+# plot
+ggplot(data = santa_clara, aes(fill = estimate)) +
+  geom_sf(color = NA) +
+  scale_fill_viridis_c(option = "magma") +
+  labs(title = "Median Household Income in Santa Clara County",
+       fill = "Income Estimate") +
+  theme_minimal()
+
+```
 
 3. Use the `tigris` function to download spatial data for counties in California. Plot the data using `ggplot()`. __Commit__ your changes. 
 
