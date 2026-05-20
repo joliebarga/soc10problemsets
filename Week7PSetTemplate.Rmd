@@ -12,7 +12,7 @@ output: pdf_document
 
 I modified the k-means clustering algorithm to use 28 cluster centers, which matches the number of neighborhoods defined in the ames dataset. By increasing the number of centers from the default of 3 or 6, the algorithm is able to identify geographic distinctions between groups of houses, producing a map that more closely resembles the neighborhood boundaries shown in the class notes. The main benefit of k-means clustering is that it is simple, fast, and does not require any prior knowledge of what the neighborhoods actually look like or where their boundaries are because the algorithm finds these groupings on its own. However, there are several important limitations to this approach. First, k-means assumes that clusters are about equal in size, which may not reflect the true shape or population density of real neighborhoods in Ames. Second, because k-means starts with randomly assigned centroids, the results can vary from run to run. Third, this model only uses longitude and latitude to form clusters, which means it ignores other features that likely define real neighborhood boundaries, such as housing prices, building types, school districts, or historical development patterns which are important considerations as well.
 
-```{r q1, echo = TRUE}
+```{r q1, echo = TRUE, message = FALSE, warning= FALSE}
 library(tidymodels)
 library(sf)
 library(magrittr)
@@ -22,7 +22,7 @@ data(ames)
 
 # make ames spatial
 ames_spatial <- ames %>%
-  st_as_sf(coords = c("Longitude", "Latitude"))
+  st_as_sf(coords = c("Longitude", "Latitude"), crs = 4326)
 
 # k-means clustering
 kclust <- kmeans(ames %>%
@@ -40,13 +40,23 @@ ggplot(ames_spatial) +
 
 
 
-```{r q2, echo = TRUE}
+```{r q2, echo = TRUE,message = FALSE, warning= FALSE}
 
+library(tigris)
+library(sf)
+library(ggplot2)
 
+# download roads data for Story County, IA
+story_roads <- roads("IA", "Story")
+
+# plot with roads added
+ggplot() +
+  geom_sf(data = ames_spatial, aes(col = cluster)) +
+  geom_sf(data = story_roads, color = "gray50", linewidth = 0.2) +
+  theme_minimal()
 
 ```
 
-[Successfully download and add roads to the plot (1 point).]
 
 
 3.  Try to train an algorithm to predict housing sales prices. Create a random forest to predict the sales price, using some new or different variables than the model above. Create a model that _better_ predicts sales price, and explain why it is better. __Commit__ your changes. 
