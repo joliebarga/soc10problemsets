@@ -125,10 +125,22 @@ collect_metrics(final_rf_res)
 4. Perhaps the model could be better trained using Cross Validation. Set up a 10-fold cross validation model, and predict sales prices again. Compare these results to your prior results. Are they similar or different, and what does this mean?   __Commit__ your changes. 
 
 
-[Train a similar model using cross validation (1 point). Correctly compare prediction metrics from cross validated and earlier models (1 point). ]
+From a 10-fold cross validation with the same random forest model from Q3, the model achieved an average rmse of 26,890 and an average rsq of 0.886 across the 10 folds. I can compare these results to the test set results from Q3 which had an rmse of 33,486 and an rsq of 0.851 so the cross validated model performs better on both metrics. This makes sense because cross validation repeatedly trains and evaluates the model on different slices of the training data, which helps reduce overfitting and produces a more stable estimate of model performance. The fact that the cross validated rmse is lower and rsq is higher than the test set suggests that the model generalizes good and that cross validation is a useful tool for getting a more reliable sense of how the model will perform on new data. These results are also consistent with what the class notes found, where cross validation performance was similar to test set performance, confirming that our model is not drastically overfitting to the training data.
 
 ```{r q4, echo = TRUE, message = FALSE}
 
+# set up cross validation
+ames_folds <- vfold_cv(ames_train, v = 10)
+
+keep_pred <- control_resamples(save_pred = TRUE, save_workflow = TRUE)
+
+# create resample object
+rf_res <- 
+  rf_wflow %>% 
+  fit_resamples(resamples = ames_folds, control = keep_pred)
+
+# examine model metrics
+collect_metrics(rf_res)
 
 ```
 
@@ -137,8 +149,3 @@ collect_metrics(final_rf_res)
 
 [Identify potential biases to algorithmic determinations of home values, and implications of these biases (1 point). Identify at least one potential way to reduce bias, and explain why it may or may not work (1 point).]
 
-
-```{r q5, echo = TRUE, message = FALSE}
-
-
-```
