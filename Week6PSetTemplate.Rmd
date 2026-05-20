@@ -1,6 +1,6 @@
 ---
 title: "Week 6 Problem Set"
-author: "Jolie Barga  (github link here)"
+author: "Jolie Barga  https://github.com/joliebarga/soc10problemsets"
 date: "March 19 2026"
 output: pdf_document
 ---
@@ -193,10 +193,10 @@ ipcc_cvs %<>%
                                    0 ~ "tomato",
                                    .default = "gray"))
 
-# define gender variable on vertices
+# gender
 V(ipcc_net)$gender_color <- ipcc_cvs$gender_color
 
-# plot network with gender colors
+# plot network
 plot(ipcc_net,
      vertex.size = 5,
      vertex.color = V(ipcc_net)$gender_color,
