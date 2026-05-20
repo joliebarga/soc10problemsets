@@ -1,20 +1,20 @@
 ---
 title: "Week 6 Problem Set"
-author: "Your Name Here! (github link here)"
-date: "Date goes Here!"
+author: "Jolie Barga  (github link here)"
+date: "March 19 2026"
 output: pdf_document
 ---
 
 
 1. Start a new document, problemset6.Rmd, in your soc10problemsets repository. (You can download a template [here](https://github.com/Soc10Spring2026/soc10problemsets_templates), but be sure to save it in your own soc10problemsets repo). Create a network based on 5 people in our class! (You can use the "class_activities.csv" file from Canvas if helpful or use the code in the template). Using `igraph`, create a network diagram based on who has worked with who in our class activities this quarter (you may want to use `graph_from_data_frame()` if you read in the csv). Then plot the network. (Note: a network with only 5 people, excluding ties to everyone outside of these 5, is sufficient). __Commit__ your changes. 
 
-[Note: the scoring guidelines in brackets can be deleted before submitting. Create a network with igraph (1 point), and plot it (0.5 points).]
 
 ```{r q1, echo = TRUE}
 library(readr)
 library(RCurl)
 library(magrittr)
 library(dplyr)
+library(igraph)
 
 # input url from github
 url <- getURL("https://raw.githubusercontent.com/tylermcdaniel/css/main/Data/class_activities.csv")
@@ -22,7 +22,24 @@ url <- getURL("https://raw.githubusercontent.com/tylermcdaniel/css/main/Data/cla
 # download class activities data (from github)
 class_activities <- read_csv(url)
 
+five_names <- c("Devir, Lindsey", "Leahy, Olivia", "Kang, Christine", 
+                "Ong, Alyssa", "Knowles, Genny")
 
+five_people <- class_activities %>%
+  filter(name_1 %in% five_names & name_2 %in% five_names)
+
+# network
+net <- graph_from_data_frame(five_people, directed = FALSE)
+
+# plot 
+plot(net, vertex.size = 30,
+     vertex.color = "lavender",
+     vertex.frame.color = NA,
+     vertex.label.cex = .7,
+     edge.curved = .05,
+     edge.arrow.size = .3,
+     edge.width = .7,
+     edge.color = "gray1")
 ```
 
 2. Choose a centrality measure, and explain how you would interpret this in the context of the class activities data. Who is/are the most central actor(s) according to this measure? __Commit__ your changes. 
