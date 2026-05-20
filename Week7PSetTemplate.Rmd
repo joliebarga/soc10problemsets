@@ -58,14 +58,67 @@ ggplot() +
 ```
 
 
-
 3.  Try to train an algorithm to predict housing sales prices. Create a random forest to predict the sales price, using some new or different variables than the model above. Create a model that _better_ predicts sales price, and explain why it is better. __Commit__ your changes. 
 
-[Create a random forest algorithm that predicts housing sales prices (0.5 points). Modify the model inputs (0.5 points) and describe the changes made (0.5 points). Use metrics to demonstrate why the model is better than the one presented in the course site (0.5 points).]
+I added four new variables to the random forest model: Overall_Cond, Total_Bsmt_SF, Garage_Cars, and Full_Bath. These variables capture important aspects of a home's quality and size that the original model we went through in class did not include. Overall condition rating reflects how buyers perceive the home's upkeep, basement size and garage capacity capture structural features that strongly influence price, and the number of full bathrooms is a key amenity that buyers consider when deciding on a house. On the training set, my model achieved an rmse of 12,647 and an rsq of 0.977, compared to the class model's rmse of 15,364 and rsq of 0.966. On the test set, my model achieved an rmse of 33,486 and an rsq of 0.851, compared to the class model's rmse of 33,329 and rsq of 0.823. The higher rsq on the test set indicates that my model explains more variance in housing prices and generalizes better to unseen data, making it a better predictive model overall.
 
 ```{r q3, echo = TRUE, message = FALSE}
 
 
+library(tidymodels)
+
+# split data
+ames_split <- initial_split(ames, prop = 0.80, strata = Sale_Price)
+ames_train <- training(ames_split)
+ames_test  <-  testing(ames_split)
+
+# create a random forest
+rf_model <- 
+  rand_forest(trees = 1000) %>% 
+  set_engine("ranger") %>% 
+  set_mode("regression")
+
+# define the random forest workflow
+rf_wflow <- 
+  workflow() %>% 
+  add_formula(
+    Sale_Price ~ Gr_Liv_Area + Year_Built + Bldg_Type + Neighborhood + 
+      Latitude + Longitude + Overall_Cond + Total_Bsmt_SF + 
+      Garage_Cars + Full_Bath) %>% 
+  add_model(rf_model)
+
+# fit the random forest model
+rf_fit <- rf_wflow %>% fit(data = ames_train)
+
+estimate_perf <- function(model, dat) {
+  # Capture the names of the `model` and `dat` objects
+  cl <- match.call()
+  obj_name <- as.character(cl$model)
+  data_name <- as.character(cl$dat)
+  data_name <- gsub("ames_", "", data_name)
+  
+  # Estimate these metrics:
+  reg_metrics <- metric_set(rmse, rsq)
+  
+  # output our model
+  output <- model %>%
+    predict(dat) %>%
+    bind_cols(dat %>% select(Sale_Price)) %>%
+    reg_metrics(Sale_Price, .pred) %>%
+    select(-.estimator) %>%
+    mutate(object = obj_name, data = data_name)
+  
+  return(output)
+}
+
+# examine random forest performance
+estimate_perf(rf_fit, ames_train)
+
+# final rf model
+final_rf_res <- last_fit(rf_wflow, ames_split)
+
+# get model metrics
+collect_metrics(final_rf_res)
 
 ```
 
