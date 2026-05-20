@@ -165,30 +165,53 @@ V(ipcc_net)[order(betweenness(ipcc_net), decreasing = TRUE)]
 
 5. Finally, plot the IPCC co-authorship data, but change the color/shape of the vertices so that these correspond to authors' gender. Describe what you see. What conclusions can you make about authorship and gender? (Note that you will need the IPCC_cv.csv dataset. The code in the template has combined these datasets). __Commit__ your changes. 
 
-[Correctly define a gender variable, and include an accurate label (1 point). Plot the IPCC co-authorship data with modified color/shape based on gender (0.5 points). Accurately describe the plot (0.5 points). Assess conclusions that can (or can't) be drawn (0.5 points).]
-
+The network I created reveals a gender imbalance in IPCC co-authorship because male authors (blue) overwhelmingly dominate the network with the vast majority of both the central cluster and the nodes being blue. Female authors (red) are fewer in number and tend to appear more on the outside  of the network, with only a handful visible near the core. This suggests that not only are women underrepresented in IPCC authorship overall, but those who are included tend to have fewer co-authorship connections than their male counterparts. However, this data only captures co-authorship patterns prior to the AR5 report, and it is possible that representation has improved in more recent assessment cycles and additionally, the binary coding of gender in this dataset does not capture the full spectrum of gender identities among researchers which is important to consider and understand about this data and when considering gender as a variable.
 
 ```{r q5, echo = TRUE, message = FALSE}
 
 library(readr)
 library(RCurl)
+library(magrittr)
+library(dplyr)
+library(igraph)
 
-# input url from github
-url <- getURL("https://raw.githubusercontent.com/tylermcdaniel/css/main/Data/IPCC_co_authorship.csv")
 
-# download authorship data (from github)
-ipcc_authors <- read_csv(url, skip = 1)
-
-# replace NA's with 0's
-ipcc_authors %<>%
-  mutate_all(~replace(., is.na(.), 0))
-
-## now gather cv data
 # input url from github
 url <- getURL("https://raw.githubusercontent.com/tylermcdaniel/css/main/Data/IPCC_cv.csv")
 
 # download authorship data (from github)
 ipcc_cvs <- read_csv(url)
 
+# remove authors who did not collaborate
+ipcc_cvs %<>%
+  slice(-no_colab)
 
+# define gender variable
+ipcc_cvs %<>%
+  mutate(gender_color = case_match(Gender,
+                                   1 ~ "steelblue",
+                                   0 ~ "tomato",
+                                   .default = "gray"))
+
+# define gender variable on vertices
+V(ipcc_net)$gender_color <- ipcc_cvs$gender_color
+
+# plot network with gender colors
+plot(ipcc_net,
+     vertex.size = 5,
+     vertex.color = V(ipcc_net)$gender_color,
+     vertex.frame.color = NA,
+     vertex.label.cex = .5,
+     edge.curved = .05,
+     edge.width = .1,
+     edge.color = "gray1")
+
+# legend
+legend(
+  "bottomright",
+  legend = c("Male", "Female"),
+  pt.bg  = c("steelblue", "tomato"),
+  pch    = 21,
+  cex    = 1,
+  title  = "Gender")
 ```
