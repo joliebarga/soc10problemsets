@@ -46,11 +46,12 @@ plot(net, vertex.size = 30,
 
 ```{r q2, echo = TRUE}
 
-
+degree(net)
 
 ```
 
-[Correctly use a centrality measure (0.5 points) and interpret its meaning (0.5 points). Identify the most central actor(s) (0.5 points).]
+I chose degree centrality as my measure and to define from class, degree centrality counts how many edges each node has, so the node with the most edges is most central. In the context of class activities from my plotting, degree centrality identifies who has worked with the most classmates which captures the most active collaborator to this specific group of students and assigned to work with the most amount of students in this specific group of 5 students. Using the degree() function, Christine and Alyssa are tied for the highest degree centrality, each with a score of 4, meaning they have worked with the most other students (a total of 4) in the group; therefore the most central actors based on degree centrality.
+
 
 
 3. Now download the IPCC co-authorship data (you can use the code included in the template). Using the IPCC co-authorship data, create a network graph of all co-authors who share at least 2 publications together, excluding those with no network ties, similar to what we do in section \@ref(co-authorship-patterns). Graph the data using eigenvector scores, rather than betweenness scores, to plot the vertex sizes. Does this make a difference in our interpretation of the network? __Commit__ your changes. 
