@@ -9,7 +9,7 @@ output: pdf_document
 1. Start a new document, problemset6.Rmd, in your soc10problemsets repository. (You can download a template [here](https://github.com/Soc10Spring2026/soc10problemsets_templates), but be sure to save it in your own soc10problemsets repo). Create a network based on 5 people in our class! (You can use the "class_activities.csv" file from Canvas if helpful or use the code in the template). Using `igraph`, create a network diagram based on who has worked with who in our class activities this quarter (you may want to use `graph_from_data_frame()` if you read in the csv). Then plot the network. (Note: a network with only 5 people, excluding ties to everyone outside of these 5, is sufficient). __Commit__ your changes. 
 
 
-```{r q1, echo = TRUE}
+```{r q1, echo = TRUE, warning = FALSE, message = FALSE}
 library(readr)
 library(RCurl)
 library(magrittr)
@@ -44,7 +44,7 @@ plot(net, vertex.size = 30,
 
 2. Choose a centrality measure, and explain how you would interpret this in the context of the class activities data. Who is/are the most central actor(s) according to this measure? __Commit__ your changes. 
 
-```{r q2, echo = TRUE}
+```{r q2, echo = TRUE, warning = FALSE, message = FALSE}
 
 degree(net)
 
@@ -58,7 +58,7 @@ I chose degree centrality as my measure and to define from class, degree central
 
 Using eigenvector centrality rather than betweenness centrality shifts which authors appear most central because while betweenness identifies authors who bridge different parts of the network, eigenvector centrality rewards authors connected to other well-connected authors meaning an author with fewer total collaborations can still appear large if their collaborators are themselves highly connected. Looking at the network, authors like Nakicenovic, Riahi, and Carraro appear among the most central nodes, so they are deeply embedded in the core cluster rather than simply their role as bridges in the cluster. This shifts our interpretation of the authors toward a tightly knit inner circle of researchers who repeatedly collaborate with each other. This has implications for IPCC authorship because it suggests that influence in this network is concentrated among a small group of highly interconnected scholars, which may reinforce existing geographic and institutional biases in whose perspectives shape global climate policy if only certain regions and beliefs are represented.
 
-```{r q3, echo = TRUE, message = FALSE}
+```{r q3, echo = TRUE, message = FALSE, warning = FALSE}
 
 library(readr)
 library(RCurl)
@@ -121,7 +121,7 @@ plot(ipcc_net,
 To disseminate the memo most efficiently across the IPCC co-authorship network, I would give it to Nakicenovic, who has the highest betweenness centrality score among all 148 authors in the network. Betweenness centrality measures how often a given node lies on the shortest path between two other nodes, meaning that authors with high betweenness scores act as critical bridges connecting otherwise disconnected parts of the network. This makes betweenness the most appropriate centrality measure for this dissemination task, since we want someone who can pass information not just to their immediate collaborators, but across many different clusters of researchers. Since Nakicenovic sits at the intersection of multiple collaborative clusters, giving them the memo maximizes the likelihood that it reaches the broadest range of authors through their existing co-authorship connections. In contrast, choosing someone with high degree or eigenvector centrality might concentrate the memo within one densely connected cluster, missing large portions of the broader network.
 
 
-```{r q4, echo = TRUE, message = FALSE}
+```{r q4, echo = TRUE, message = FALSE, warning = FALSE}
 
 # input url from github
 url <- getURL("https://raw.githubusercontent.com/tylermcdaniel/css/main/Data/IPCC_co_authorship.csv")
@@ -167,7 +167,7 @@ V(ipcc_net)[order(betweenness(ipcc_net), decreasing = TRUE)]
 
 The network I created reveals a gender imbalance in IPCC co-authorship because male authors (blue) overwhelmingly dominate the network with the vast majority of both the central cluster and the nodes being blue. Female authors (red) are fewer in number and tend to appear more on the outside  of the network, with only a handful visible near the core. This suggests that not only are women underrepresented in IPCC authorship overall, but those who are included tend to have fewer co-authorship connections than their male counterparts. However, this data only captures co-authorship patterns prior to the AR5 report, and it is possible that representation has improved in more recent assessment cycles and additionally, the binary coding of gender in this dataset does not capture the full spectrum of gender identities among researchers which is important to consider and understand about this data and when considering gender as a variable.
 
-```{r q5, echo = TRUE, message = FALSE}
+```{r q5, echo = TRUE, message = FALSE, warning = FALSE}
 
 library(readr)
 library(RCurl)
