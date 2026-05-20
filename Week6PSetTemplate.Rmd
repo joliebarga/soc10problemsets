@@ -118,7 +118,8 @@ plot(ipcc_net,
 4. Let's say you want to give one of the IPCC authors a memo to disseminate to the others. Who would you choose? Which measure of centrality would help you arrive at your answer? __Commit__ your changes. 
 
 
-[Identify a reasonable strategy for dissemenation (1 point). Discuss a reasonable centrality measure that aligns with strategy (0.5 points). Correctly identify the node with highest value for said centrality measure (0.5 points).]
+To disseminate the memo most efficiently across the IPCC co-authorship network, I would give it to Nakicenovic, who has the highest betweenness centrality score among all 148 authors in the network. Betweenness centrality measures how often a given node lies on the shortest path between two other nodes, meaning that authors with high betweenness scores act as critical bridges connecting otherwise disconnected parts of the network. This makes betweenness the most appropriate centrality measure for this dissemination task, since we want someone who can pass information not just to their immediate collaborators, but across many different clusters of researchers. Since Nakicenovic sits at the intersection of multiple collaborative clusters, giving them the memo maximizes the likelihood that it reaches the broadest range of authors through their existing co-authorship connections. In contrast, choosing someone with high degree or eigenvector centrality might concentrate the memo within one densely connected cluster, missing large portions of the broader network.
+
 
 ```{r q4, echo = TRUE, message = FALSE}
 
@@ -132,8 +133,35 @@ ipcc_authors <- read_csv(url, skip = 1)
 ipcc_authors %<>%
   mutate_all(~replace(., is.na(.), 0))
 
-```
+# reorder column names to match rows
+ipcc_authors %<>%
+  select(order(colnames(.)))
 
+# turn dataframe into matrix
+ipcc_authors %<>%
+  select(-Author) %>%
+  as.matrix()
+
+# replace 1s with 0s (threshold: at least 2 co-authorships)
+ipcc_authors[ipcc_authors == 1] = 0
+
+# replace NAs with 0s
+ipcc_authors[is.na(ipcc_authors)] = 0
+
+# vector of authors who do not collaborate with others
+no_colab <- which(apply(ipcc_authors, 1, sum, na.rm = TRUE) == 0)
+
+# remove non-collaborators
+ipcc_authors <- ipcc_authors[-no_colab, -no_colab]
+
+# network
+ipcc_net <- graph_from_adjacency_matrix(ipcc_authors,
+                                        mode = "undirected")
+
+# authors in descending order of betweenness
+V(ipcc_net)[order(betweenness(ipcc_net), decreasing = TRUE)]
+
+```
 
 5. Finally, plot the IPCC co-authorship data, but change the color/shape of the vertices so that these correspond to authors' gender. Describe what you see. What conclusions can you make about authorship and gender? (Note that you will need the IPCC_cv.csv dataset. The code in the template has combined these datasets). __Commit__ your changes. 
 
