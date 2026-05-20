@@ -10,11 +10,30 @@ output: pdf_document
 
 1. Start a new document, problemset7.Rmd, in your soc10problemsets repository. (You can download a template [here](https://github.com/Soc10Spring2026/soc10problemsets_templates), but be sure to save it in your own soc10problemsets repo). Create a map of the `ames` data, but change the cluster specifications to try to get closer to the "true" neighborhoods shown [here](https://019c932f-6501-a8d5-bac5-df7f6ede5a76.share.connect.posit.cloud/predictions-and-machine-learning.html#fig:amesfigure).  Describe the benefits and limitations of your approach. __Commit__ your changes. 
 
-[Modify k-means to produce clusters closer to the ames neighborhood definitions (1 points), successfully map the ames data and clusters (0.5 points). Demonstrate understanding of benefits/limitations to k-means clustering (0.5 points).]
+I modified the k-means clustering algorithm to use 28 cluster centers, which matches the number of neighborhoods defined in the ames dataset. By increasing the number of centers from the default of 3 or 6, the algorithm is able to identify geographic distinctions between groups of houses, producing a map that more closely resembles the neighborhood boundaries shown in the class notes. The main benefit of k-means clustering is that it is simple, fast, and does not require any prior knowledge of what the neighborhoods actually look like or where their boundaries are because the algorithm finds these groupings on its own. However, there are several important limitations to this approach. First, k-means assumes that clusters are about equal in size, which may not reflect the true shape or population density of real neighborhoods in Ames. Second, because k-means starts with randomly assigned centroids, the results can vary from run to run. Third, this model only uses longitude and latitude to form clusters, which means it ignores other features that likely define real neighborhood boundaries, such as housing prices, building types, school districts, or historical development patterns which are important considerations as well.
 
 ```{r q1, echo = TRUE}
+library(tidymodels)
+library(sf)
+library(magrittr)
 
+# load ames data
+data(ames)
 
+# make ames spatial
+ames_spatial <- ames %>%
+  st_as_sf(coords = c("Longitude", "Latitude"))
+
+# k-means clustering
+kclust <- kmeans(ames %>%
+                   select(Longitude, Latitude), centers = 28)
+
+# add clusters
+ames_spatial %<>% 
+  mutate(cluster = as.character(kclust$cluster))
+
+ggplot(ames_spatial) + 
+  geom_sf(aes(col = cluster))
 ```
 
 2. Using the `tigris` package, download roads data for the county of Story, IA. Add roads to your plot. __Commit__ your changes. 
