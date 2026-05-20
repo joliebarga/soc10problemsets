@@ -5,9 +5,6 @@ date: "May 19 2026"
 output: pdf_document
 ---
 
-
-[Note: the scoring guidelines in brackets can be deleted before submitting. Overall presentation/cleanliness of document (e.g. writing and code presented clearly, no unnecessary messages/warnings) 1 point.]
-
 1. Start a new document, problemset7.Rmd, in your soc10problemsets repository. (You can download a template [here](https://github.com/Soc10Spring2026/soc10problemsets_templates), but be sure to save it in your own soc10problemsets repo). Create a map of the `ames` data, but change the cluster specifications to try to get closer to the "true" neighborhoods shown [here](https://019c932f-6501-a8d5-bac5-df7f6ede5a76.share.connect.posit.cloud/predictions-and-machine-learning.html#fig:amesfigure).  Describe the benefits and limitations of your approach. __Commit__ your changes. 
 
 I modified the k-means clustering algorithm to use 28 cluster centers, which matches the number of neighborhoods defined in the ames dataset. By increasing the number of centers from the default of 3 or 6, the algorithm is able to identify geographic distinctions between groups of houses, producing a map that more closely resembles the neighborhood boundaries shown in the class notes. The main benefit of k-means clustering is that it is simple, fast, and does not require any prior knowledge of what the neighborhoods actually look like or where their boundaries are because the algorithm finds these groupings on its own. However, there are several important limitations to this approach. First, k-means assumes that clusters are about equal in size, which may not reflect the true shape or population density of real neighborhoods in Ames. Second, because k-means starts with randomly assigned centroids, the results can vary from run to run. Third, this model only uses longitude and latitude to form clusters, which means it ignores other features that likely define real neighborhood boundaries, such as housing prices, building types, school districts, or historical development patterns which are important considerations as well.
@@ -62,7 +59,7 @@ ggplot() +
 
 I added four new variables to the random forest model: Overall_Cond, Total_Bsmt_SF, Garage_Cars, and Full_Bath. These variables capture important aspects of a home's quality and size that the original model we went through in class did not include. Overall condition rating reflects how buyers perceive the home's upkeep, basement size and garage capacity capture structural features that strongly influence price, and the number of full bathrooms is a key amenity that buyers consider when deciding on a house. On the training set, my model achieved an rmse of 12,647 and an rsq of 0.977, compared to the class model's rmse of 15,364 and rsq of 0.966. On the test set, my model achieved an rmse of 33,486 and an rsq of 0.851, compared to the class model's rmse of 33,329 and rsq of 0.823. The higher rsq on the test set indicates that my model explains more variance in housing prices and generalizes better to unseen data, making it a better predictive model overall.
 
-```{r q3, echo = TRUE, message = FALSE}
+```{r q3, echo = TRUE, message = FALSE, warning= FALSE}
 
 
 library(tidymodels)
@@ -127,7 +124,7 @@ collect_metrics(final_rf_res)
 
 From a 10-fold cross validation with the same random forest model from Q3, the model achieved an average rmse of 26,890 and an average rsq of 0.886 across the 10 folds. I can compare these results to the test set results from Q3 which had an rmse of 33,486 and an rsq of 0.851 so the cross validated model performs better on both metrics. This makes sense because cross validation repeatedly trains and evaluates the model on different slices of the training data, which helps reduce overfitting and produces a more stable estimate of model performance. The fact that the cross validated rmse is lower and rsq is higher than the test set suggests that the model generalizes good and that cross validation is a useful tool for getting a more reliable sense of how the model will perform on new data. These results are also consistent with what the class notes found, where cross validation performance was similar to test set performance, confirming that our model is not drastically overfitting to the training data.
 
-```{r q4, echo = TRUE, message = FALSE}
+```{r q4, echo = TRUE, message = FALSE, warning= FALSE}
 
 # set up cross validation
 ames_folds <- vfold_cv(ames_train, v = 10)
@@ -147,5 +144,7 @@ collect_metrics(rf_res)
 
 5. If a real estate company used algorithms to determine home values, could this have any societal implications? Walk the reader through why the data could induce biases and how you might try to resolve these potential problems.  __Commit__ your changes. 
 
-[Identify potential biases to algorithmic determinations of home values, and implications of these biases (1 point). Identify at least one potential way to reduce bias, and explain why it may or may not work (1 point).]
+If a real estate company used algorithms to determine home values, this could have significant societal implications because if we look at how the ames dataset includes variables like Neighborhood, Latitude, and Longitude these are geographic features that can act as proxies for race and socioeconomic status due to historical patterns of residential segregation. If an algorithm is trained on historical sales data that already reflects these inequalities, it may learn to assign lower values to homes in certain neighborhoods not because of the physical characteristics of the homes but because of who lives there, which would effectively encode existing housing discrimination into the system and make it harder for residents of these neighborhoods to build wealth through homeownership.
+
+Additionally, variables like Garage_Cars, Total_Bsmt_SF, and overall condition ratings may systematically disadvantage older housing stock that is more common in certain neighborhoods, further compounding these biases in predicted home values. As Molina and Garip note and I learned in CS 186, even if a researcher removes an explicitly biased variable like neighborhood from the model, the algorithm may still use other variables as proxies that capture the same underlying inequalities which makes this a difficult problem to fully solve. One potential way to reduce these biases would be to remove geographic variables like Neighborhood, Latitude, and Longitude from the model entirely and focus only on the physical characteristics of the home. However this may not fully resolve the problem because other variables can still act as proxies for location. A more comprehensive approach might involve auditing the model's predictions across different demographic groups and geographic areas to identify where systematic disparities exist and then adjusting the model to ensure more equitable outcomes through a trial and error method and if ever used in real housing data checking frequently and adjusting when needed to ensure no biases with the help of researchers and data scientists.
 
