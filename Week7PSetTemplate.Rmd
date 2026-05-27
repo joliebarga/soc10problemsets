@@ -117,6 +117,8 @@ final_rf_res <- last_fit(rf_wflow, ames_split)
 # get model metrics
 collect_metrics(final_rf_res)
 
+tidy_article <- guar
+
 ```
 
 4. Perhaps the model could be better trained using Cross Validation. Set up a 10-fold cross validation model, and predict sales prices again. Compare these results to your prior results. Are they similar or different, and what does this mean?   __Commit__ your changes. 
