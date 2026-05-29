@@ -102,18 +102,13 @@ ggplot(dc_top_terms, aes(beta, term, fill = factor(topic))) +
 
 2. Describe the topics that you found in question 1. How do these compare to the topics in the $k$ = 2 case (in section \@ref(topic-models)), and how well do these describe your data? __Commit your changes__.  
 
-[Describe topics accurately (0.5 points) and make comparisons to the 2 topic case (1 point).]
+The five topics from my k = 5 model seem to capture different themes in the DataCenterDebate subreddit. Topic 1 seems focused on energy and infrastructure, with top words like "gas," "energy," "water," "power," and "natural." This suggests people are discussing the resources that data centers consume. Topic 2 appears to be about AI and industry growth, with words like "ai," "power," "people," "tech," "companies," "building," and "build." This looks like conversations about the tech industry expanding data center capacity across the globe and whats needed/the constituients to do so . Topic 3 looks like it is about local environmental impact, with words like "water," "cooling," "impact," "heat," and "city." This points to community level concerns about how data centers affect local environments and the environmental aspects and impacts it has. Topic 4 seems focused on local news and specific projects, with words like "2025," "city," "news," "bessemer," "project," and "cooling." This suggests coverage of specific proposed or ongoing data center developments in particular places and where the discussion peaked and continues to take place .Topic 5 appears to be a more general discussion topic, with broad terms like "data," "center," "centers," "water," "ai," and "communities." This field combines all of the different charts.
+Compared to the k = 2 case from the class notes, the 5 topic model is a lot more informative. In the k = 2 model, the two topics were very broad and hard to distinguish from each other since both had words like "data," "centers," and "water" near the top. It was difficult to say what was really different between the two topics. With k = 5, the topics are much more separated and easier to interpret. For example, Topic 4 picks up on very specific local coverage with words like "bessemer" and "news" that would have been buried inside one of the two broad topics in the k = 2 model. Similarly, Topic 2 pulls out AI and industry language more clearly, whereas in the k = 2 model that kind of language was mixed in with more general data center terms. Overall, the k = 5 model does a better job capturing the range of concerns people raise on this subreddit, from energy use to local community impact to industry growth, even if some topics like Topic 5 are still a bit broad and general.
 
 
 3. Create an account in [Claude](https://claude.com/product/overview) or [ChatGPT](https://chatgpt.com/) (or both). The free versions are sufficient! Ask your LLM to write R code that downloads Reddit data, models topics (any number) and describes these topics. List the prompts that you used, your impressions of the results, and how these differed (or didn't differ) from your responses to questions 1 and 2.  __Commit your changes__. 
 
-```{r q3, echo = TRUE, message = FALSE}
 
-
-
-```
-
-[Display LLM prompts (0.5 points) and LLM-generated code (0.5 points). Accurately describe differences in LLM-generated results and your own results (1 point).]
 
 
 4. Considering Engzell and Wilmers' multi-agent workflow, try to improve your Claude modelling process (you might not be able to set up a true multi-agent workflow in the free versions, but you could simulate this by giving your LLM instructions to review or improve the existing output in specific ways, having ChatGPT review the Claude code or vice versa, etc.). Explain what you tried (including additional prompts), how your results changed (or didn't change), and whether this improved your understanding of the data or not. __Commit your changes__. 
