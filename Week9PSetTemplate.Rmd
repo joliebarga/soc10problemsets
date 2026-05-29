@@ -23,10 +23,8 @@ dc_subreddits <- find_subreddits("data center")
 dc_urls <- find_thread_urls(keywords = "data center",
                             period = "week")
 
-# extract comments from these pages
 dc_comments <- get_thread_content(dc_urls$url)
 
-# look at comments
 dc_comments$comments
 
 # look at threads
@@ -41,10 +39,8 @@ library(magrittr)
 library(topicmodels)
 library(ggplot2)
 
-# load pre-downloaded reddit data on data centers
 dc_comments <- read_rds("dc_comments.rds")
 
-# create tidytext datasets
 tidy_comments <- dc_comments$comments %>%
   unnest_tokens(word, comment) %>%
   anti_join(stop_words)
@@ -67,7 +63,6 @@ tidy_threads_counts <- tidy_threads %>%
 tidy_threadtitles_counts <- tidy_threadtitles %>%
   count(url, word, sort = TRUE)
 
-# combine and remove NA values
 tidy_counts <- bind_rows(tidy_comments_counts,
                          tidy_threads_counts,
                          tidy_threadtitles_counts)
@@ -75,14 +70,12 @@ tidy_counts <- bind_rows(tidy_comments_counts,
 tidy_counts %<>%
   na.omit()
 
-# recast as document-term matrix
 dc_dtm <- tidy_counts %>%
   cast_dtm(url, word, n)
 
-# run lda with k = 5 topics
+# k = 5 topics
 dc_lda <- LDA(dc_dtm, 5, control = list(seed = 1))
 
-# get word-topic probabilities
 dc_topics <- tidy(dc_lda, matrix = "beta")
 
 # get top 10 words per topic
@@ -93,7 +86,6 @@ dc_top_terms <- dc_topics %>%
   arrange(topic, -beta) %>%
   mutate(term = reorder_within(term, beta, topic))
 
-# plot top words in each topic
 ggplot(dc_top_terms, aes(beta, term, fill = factor(topic))) +
   geom_col(show.legend = FALSE) +
   facet_wrap(~ topic, scales = "free") +
@@ -270,5 +262,6 @@ ggplot(dc_top_terms, aes(beta, term, fill = factor(topic))) +
 
 5. Consider how LLMs (specifically, their ability to write large amount of text and code with a single prompt) will change the social sciences. Will this technology free up researchers to pursue bigger ideas, or will it lead to "mediocrity at scale?" What do you see as the most important opportunities and challenges related to LLMs in the social sciences? (Please refrain from using your LLM to write your answer - I want to know your thoughts!). __Commit your changes__. 
 
-[Make reasonable predictions with references to relevant materials (0.5 points). Describe opportunities and challenges for the future of social science research (1 point).]
+I think LLMs will have a big impact on the social sciences, and honestly I see both sides of it. On one hand, the ability to generate code and write large amounts of text quickly is genuinely useful. Things that used to take hours like writing up methods sections, cleaning data, or figuring out the right syntax for a function can now be done in seconds. This could free up researchers to spend more time on the parts of research that actually require creative thinking, like coming up with interesting questions or interpreting what findings actually mean for society. But I think there is a real risk of losing something important in the process because lot of what makes good social science is the deep engagement a researcher has with their data and their subject. When you spend a long time working through your analysis manually, you notice things you might not have expected, you develop intuitions about your data, and you start to really understand the people or communities you are studying. If LLMs are doing most of that work, I worry that researchers will lose that connection to their data and that the work will start to feel more mechanical than meaningful.
+I also think passion matters a lot in research. The best social science comes from researchers who genuinely care about the questions they are asking. If LLMs make it too easy to produce papers quickly, I think we will see a lot more of what the SocArxiv editors called "AI-generated slop," work that is technically competent but does not really say anything interesting or important. Engzell and Wilmers found that even their best LLM generated papers struggled with framing and making arguments of broad interest, which makes sense because those are the parts of research that require actually caring about the question. So while I see both sides, I think human-driven research and papers is key to the future of academia and societal advancement in the social science field.
 
