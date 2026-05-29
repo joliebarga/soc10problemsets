@@ -108,7 +108,102 @@ Compared to the k = 2 case from the class notes, the 5 topic model is a lot more
 
 3. Create an account in [Claude](https://claude.com/product/overview) or [ChatGPT](https://chatgpt.com/) (or both). The free versions are sufficient! Ask your LLM to write R code that downloads Reddit data, models topics (any number) and describes these topics. List the prompts that you used, your impressions of the results, and how these differed (or didn't differ) from your responses to questions 1 and 2.  __Commit your changes__. 
 
+I made a Claude account and asked the following prompt:"Write R code that downloads Reddit data on data centers, runs a topic model, and describes the topics found."Below is the code Claude produced:
 
+```{r q3, echo = TRUE, message=FALSE, warning=FALSE, eval = FALSE}
+library(RedditExtractoR)
+library(tidytext)
+library(dplyr)
+library(topicmodels)
+library(ggplot2)
+library(tidyr)
+
+# download reddit data on data centers
+dc_urls <- find_thread_urls(keywords = "data center", period = "week")
+dc_comments <- get_thread_content(dc_urls$url)
+
+# put comments in tidytext format
+tidy_dc <- dc_comments$comments %>%
+  unnest_tokens(word, comment) %>%
+  anti_join(stop_words) %>%
+  count(url, word, sort = TRUE) %>%
+  na.omit()
+
+# create document term matrix
+dc_dtm <- tidy_dc %>%
+  cast_dtm(url, word, n)
+
+# run topic model with 4 topics
+dc_lda <- LDA(dc_dtm, k = 4, control = list(seed = 42))
+
+# get top terms per topic
+dc_topics <- tidy(dc_lda, matrix = "beta")
+
+dc_top_terms <- dc_topics %>%
+  group_by(topic) %>%
+  slice_max(beta, n = 10) %>%
+  ungroup() %>%
+  arrange(topic, -beta) %>%
+  mutate(term = reorder_within(term, beta, topic))
+
+# plot
+ggplot(dc_top_terms, aes(beta, term, fill = factor(topic))) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ topic, scales = "free") +
+  scale_y_reordered() +
+  labs(title = "Top Terms per Topic in Data Center Reddit Discussion",
+       x = "Beta", y = "Term")
+```
+
+Claude's code was pretty similar to what I wrote in Q1 and Q2, which makes sense since both approaches follow the same general tidytext and topicmodels workflow. The main differences were that Claude used k = 4 topics instead of 5, used a different random seed (42 instead of 1), only used comments rather than combining comments, threads, and thread titles, and added a title to the plot. Claude also skipped the step of creating separate counts for comments, threads, and thread titles and combining them with bind_rows, which means it would likely produce slightly different topics than my analysis since it is working with less data. Claude produced code that was similar in structure to what I wrote in Q1 and Q2, but it ran into the same 403 API error that I experienced. So I followed up with a second prompt: I already have the Reddit data loaded as dc_comments. Write R code that creates a topic model from dc_comments and plots the top words in each topic.
+
+```{r q3-load, echo = TRUE, message=FALSE, warning=FALSE, eval = TRUE}
+library(tidytext)
+library(dplyr)
+library(magrittr)
+library(topicmodels)
+library(ggplot2)
+library(readr)
+
+# load pre-downloaded data
+dc_comments <- read_rds("dc_comments.rds")
+
+# put comments in tidytext format
+tidy_dc <- dc_comments$comments %>%
+  unnest_tokens(word, comment) %>%
+  anti_join(stop_words) %>%
+  count(url, word, sort = TRUE) %>%
+  na.omit()
+
+# create document term matrix
+dc_dtm <- tidy_dc %>%
+  cast_dtm(url, word, n)
+
+# run topic model with 4 topics
+dc_lda <- LDA(dc_dtm, k = 4, control = list(seed = 42))
+
+# get top terms per topic
+dc_topics <- tidy(dc_lda, matrix = "beta")
+
+dc_top_terms <- dc_topics %>%
+  group_by(topic) %>%
+  slice_max(beta, n = 10) %>%
+  ungroup() %>%
+  arrange(topic, -beta) %>%
+  mutate(term = reorder_within(term, beta, topic))
+
+# plot
+ggplot(dc_top_terms, aes(beta, term, fill = factor(topic))) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ topic, scales = "free") +
+  scale_y_reordered() +
+  labs(title = "Top Terms per Topic in Data Center Reddit Discussion",
+       x = "Beta", y = "Term")
+```
+
+This second prompt gave me code that actually ran successfully. There were a few differences between what Claude produced and what I did in Q1 and Q2. Like the first prompt, Claude used k = 4 topics instead of 5, used a different random seed (42 instead of 1), and only used the comments data rather than combining comments, threads, and thread titles together like I did. This means Claude was working with less data overall, which could affect the topics it finds.
+The topics Claude found with k = 4 were a bit broader than the ones I found with k = 5. Since Claude used fewer topics, some of the more specific themes like local news coverage and environmental impact that showed up separately in my k = 5 model were probably merged together into one broader topic. This is similar to the difference between the k = 2 and k = 5 models we discussed in Q2, where more topics gave more specific and interpretable results.
+One interesting thing about this exercise is that Claude knew the general workflow for topic modeling in R pretty well, but it did not know about the API access issue ahead of time and needed a follow up prompt to actually produce working code. This shows that LLMs can be useful for getting a starting point for code, but they do not always account for real world constraints like API restrictions, and they may make different decisions than a researcher would, like choosing a different k value or leaving out parts of the data. 
 
 
 4. Considering Engzell and Wilmers' multi-agent workflow, try to improve your Claude modelling process (you might not be able to set up a true multi-agent workflow in the free versions, but you could simulate this by giving your LLM instructions to review or improve the existing output in specific ways, having ChatGPT review the Claude code or vice versa, etc.). Explain what you tried (including additional prompts), how your results changed (or didn't change), and whether this improved your understanding of the data or not. __Commit your changes__. 
