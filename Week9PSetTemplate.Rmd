@@ -208,13 +208,64 @@ One interesting thing about this exercise is that Claude knew the general workfl
 
 4. Considering Engzell and Wilmers' multi-agent workflow, try to improve your Claude modelling process (you might not be able to set up a true multi-agent workflow in the free versions, but you could simulate this by giving your LLM instructions to review or improve the existing output in specific ways, having ChatGPT review the Claude code or vice versa, etc.). Explain what you tried (including additional prompts), how your results changed (or didn't change), and whether this improved your understanding of the data or not. __Commit your changes__. 
 
+To simulate the multi-agent workflow from Engzell and Wilmers, I used Claude as both a coder and a reviewer. After getting the initial code from Q3, I gave Claude this follow up prompt: "Review the topic model code you just wrote. Are there any improvements you would suggest to make the topics more interpretable or the model more accurate?"
+Claude suggested removing very rare words from the document term matrix before running LDA since rare words can add noise to the topics. It also suggested trying a higher k value and adding descriptive labels to the plot. I then asked it to implement these changes: "Update the code to remove words that appear in fewer than 5 documents, and add descriptive labels to each topic based on the top words."
+The updated code did produce slightly cleaner topics with less noise from unusual or rare words. But the labels Claude came up with for each topic were pretty generic, things like "infrastructure discussion" and "community concerns," which were not really more helpful than just looking at the top words myself.
+This matched what Engzell and Wilmers found and that the review step made some technical improvements like cleaning up the data, but it also had limits since claude's topic labels felt forced and not very specific. Engzell and Wilmers say that review agents can sometimes make things worse by over-interpreting results or creating new problems while fixing small ones, and I think I saw something similar here. Overall the multi-agent simulation was somewhat useful for catching things like data cleaning steps I missed, but it did not really improve my understanding of the actual topics compared to what I found in Q1 and Q2. This makes sense with Engzell and Wilmers' argument that human checkpoints are still important, because the LLM could improve the code technically but it could not really tell me anything new or interesting about what people are actually saying about data centers.
 
-```{r q4, echo = TRUE, message = FALSE}
+```{r q4, echo = TRUE, message=FALSE, warning=FALSE, eval = TRUE}
+library(tidytext)
+library(dplyr)
+library(magrittr)
+library(topicmodels)
+library(ggplot2)
+library(readr)
 
+# load pre-downloaded data
+dc_comments <- read_rds("dc_comments.rds")
 
+# put comments in tidytext format
+tidy_dc <- dc_comments$comments %>%
+  unnest_tokens(word, comment) %>%
+  anti_join(stop_words) %>%
+  count(url, word, sort = TRUE) %>%
+  na.omit()
+
+# remove words that appear in fewer than 5 documents
+tidy_dc <- tidy_dc %>%
+  group_by(word) %>%
+  filter(n() >= 5) %>%
+  ungroup()
+
+# create document term matrix
+dc_dtm <- tidy_dc %>%
+  cast_dtm(url, word, n)
+
+# run topic model with 4 topics
+dc_lda <- LDA(dc_dtm, k = 4, control = list(seed = 42))
+
+# get top terms per topic
+dc_topics <- tidy(dc_lda, matrix = "beta")
+
+dc_top_terms <- dc_topics %>%
+  group_by(topic) %>%
+  slice_max(beta, n = 10) %>%
+  ungroup() %>%
+  arrange(topic, -beta) %>%
+  mutate(term = reorder_within(term, beta, topic))
+
+# plot with topic labels
+ggplot(dc_top_terms, aes(beta, term, fill = factor(topic))) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ topic, scales = "free",
+             labeller = as_labeller(c("1" = "Infrastructure",
+                                      "2" = "AI and Industry",
+                                      "3" = "Community Concerns",
+                                      "4" = "Local News"))) +
+  scale_y_reordered() +
+  labs(title = "Top Terms per Topic in Data Center Reddit Discussion",
+       x = "Beta", y = "Term")
 ```
-
-[Describe a new workflow involving multiple LLM queries or agents (1 point). Describe how the results change (0.5 points) and the degree to which this changes understanding of the data (0.5 points).]
 
 
 5. Consider how LLMs (specifically, their ability to write large amount of text and code with a single prompt) will change the social sciences. Will this technology free up researchers to pursue bigger ideas, or will it lead to "mediocrity at scale?" What do you see as the most important opportunities and challenges related to LLMs in the social sciences? (Please refrain from using your LLM to write your answer - I want to know your thoughts!). __Commit your changes__. 
