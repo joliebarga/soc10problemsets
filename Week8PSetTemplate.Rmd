@@ -43,35 +43,27 @@ library(RedditExtractoR)
 library(tidytext)
 library(dplyr)
 library(magrittr)
+library(readr)
 
-# extract nba subreddits
-nba_subreddits <- find_subreddits("nba")
-# get urls from multiple subreddits related to basketball
-nba_urls <- find_thread_urls(subreddit = "nba",
-                             period = "day")
+# extract data center subreddits
+dc_subreddits <- find_subreddits("data centers")
 
-nba2_urls <- find_thread_urls(subreddit = "nbadiscussion",
-                              period = "day")
-
-# combine urls from both subreddits
-all_urls <- rbind(nba_urls, nba2_urls)
-
-# extract comments from these pages
-nba_comments <- get_thread_content(all_urls$url)
+# load pre-downloaded reddit data on data centers
+dc_comments <- read_rds("dc_comments.rds")
 
 # take a look at threads
-nba_comments$threads
+dc_comments$threads
 
 # take a look at comments
-nba_comments$comments
+dc_comments$comments
 
 # put comments in tidytext format - one word per row
-tidy_nba <- nba_comments$comments %>%
+tidy_dc <- dc_comments$comments %>%
   unnest_tokens(word, comment) %>%
   anti_join(stop_words)
 
 # look at words and timestamps
-tidy_nba %>%
+tidy_dc %>%
   select(timestamp, word)
 ```
 
