@@ -1,0 +1,133 @@
+---
+title: "Week 9 Problem Set"
+author: "Jolie Barga https://github.com/joliebarga/soc10problemsets"
+date: "May 28 2026"
+output: pdf_document
+---
+
+
+1. Start a new document, problemset9.Rmd, in your soc10problemsets repository. (You can download a template [here](https://github.com/Soc10Spring2026/soc10problemsets_templates), but be sure to save it in your own soc10problemsets repo). `RedditExtractoR` to download Reddit comments and threads on data centers. Create a topic model from the subreddit "DataCenterDebate" using $k$ = 5, and show a figure with the 10 relative most common words in each topic. __Commit your changes__. 
+
+[Successfully download comments and threads using the Reddit API (0.5 points). Create a topic model with 5 topics (1 point) and plot the relative most common words in each topic (0.5 points).]
+
+```{r q1, echo = TRUE, message=FALSE, warning=FALSE, eval = FALSE}
+library(RedditExtractoR)
+library(tidytext)
+library(dplyr)
+library(magrittr)
+
+# find data center subreddits
+dc_subreddits <- find_subreddits("data center")
+
+# get urls from the DataCenterDebate subreddit
+dc_urls <- find_thread_urls(keywords = "data center",
+                            period = "week")
+
+# extract comments from these pages
+dc_comments <- get_thread_content(dc_urls$url)
+
+# look at comments
+dc_comments$comments
+
+# look at threads
+dc_comments$threads
+```
+
+```{r q1-load, echo = TRUE, message=FALSE, warning=FALSE, eval = TRUE}
+library(readr)
+library(tidytext)
+library(dplyr)
+library(magrittr)
+library(topicmodels)
+library(ggplot2)
+
+# load pre-downloaded reddit data on data centers
+dc_comments <- read_rds("dc_comments.rds")
+
+# create tidytext datasets
+tidy_comments <- dc_comments$comments %>%
+  unnest_tokens(word, comment) %>%
+  anti_join(stop_words)
+
+tidy_threads <- dc_comments$threads %>%
+  unnest_tokens(word, text) %>%
+  anti_join(stop_words)
+
+tidy_threadtitles <- dc_comments$threads %>%
+  unnest_tokens(word, title) %>%
+  anti_join(stop_words)
+
+# create counts of each word per document
+tidy_comments_counts <- tidy_comments %>%
+  count(url, word, sort = TRUE)
+
+tidy_threads_counts <- tidy_threads %>%
+  count(url, word, sort = TRUE)
+
+tidy_threadtitles_counts <- tidy_threadtitles %>%
+  count(url, word, sort = TRUE)
+
+# combine and remove NA values
+tidy_counts <- bind_rows(tidy_comments_counts,
+                         tidy_threads_counts,
+                         tidy_threadtitles_counts)
+
+tidy_counts %<>%
+  na.omit()
+
+# recast as document-term matrix
+dc_dtm <- tidy_counts %>%
+  cast_dtm(url, word, n)
+
+# run lda with k = 5 topics
+dc_lda <- LDA(dc_dtm, 5, control = list(seed = 1))
+
+# get word-topic probabilities
+dc_topics <- tidy(dc_lda, matrix = "beta")
+
+# get top 10 words per topic
+dc_top_terms <- dc_topics %>%
+  group_by(topic) %>%
+  slice_max(beta, n = 10) %>%
+  ungroup() %>%
+  arrange(topic, -beta) %>%
+  mutate(term = reorder_within(term, beta, topic))
+
+# plot top words in each topic
+ggplot(dc_top_terms, aes(beta, term, fill = factor(topic))) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ topic, scales = "free") +
+  scale_y_reordered()
+```
+
+2. Describe the topics that you found in question 1. How do these compare to the topics in the $k$ = 2 case (in section \@ref(topic-models)), and how well do these describe your data? __Commit your changes__.  
+
+[Describe topics accurately (0.5 points) and make comparisons to the 2 topic case (1 point).]
+
+
+3. Create an account in [Claude](https://claude.com/product/overview) or [ChatGPT](https://chatgpt.com/) (or both). The free versions are sufficient! Ask your LLM to write R code that downloads Reddit data, models topics (any number) and describes these topics. List the prompts that you used, your impressions of the results, and how these differed (or didn't differ) from your responses to questions 1 and 2.  __Commit your changes__. 
+
+```{r q3, echo = TRUE, message = FALSE}
+
+
+
+```
+
+[Display LLM prompts (0.5 points) and LLM-generated code (0.5 points). Accurately describe differences in LLM-generated results and your own results (1 point).]
+
+
+4. Considering Engzell and Wilmers' multi-agent workflow, try to improve your Claude modelling process (you might not be able to set up a true multi-agent workflow in the free versions, but you could simulate this by giving your LLM instructions to review or improve the existing output in specific ways, having ChatGPT review the Claude code or vice versa, etc.). Explain what you tried (including additional prompts), how your results changed (or didn't change), and whether this improved your understanding of the data or not. __Commit your changes__. 
+
+
+```{r q4, echo = TRUE, message = FALSE}
+
+
+```
+
+[Describe a new workflow involving multiple LLM queries or agents (1 point). Describe how the results change (0.5 points) and the degree to which this changes understanding of the data (0.5 points).]
+
+
+5. Consider how LLMs (specifically, their ability to write large amount of text and code with a single prompt) will change the social sciences. Will this technology free up researchers to pursue bigger ideas, or will it lead to "mediocrity at scale?" What do you see as the most important opportunities and challenges related to LLMs in the social sciences? (Please refrain from using your LLM to write your answer - I want to know your thoughts!). __Commit your changes__. 
+
+[Make reasonable predictions with references to relevant materials (0.5 points). Describe opportunities and challenges for the future of social science research (1 point).]
+
