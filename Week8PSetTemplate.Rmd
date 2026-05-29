@@ -39,8 +39,40 @@ guardian_wc %>%
 
 ```{r q2, echo = TRUE, message=FALSE, warning=FALSE}
 
+library(RedditExtractoR)
+library(tidytext)
+library(dplyr)
+library(magrittr)
 
+# extract nba subreddits
+nba_subreddits <- find_subreddits("nba")
+# get urls from multiple subreddits related to basketball
+nba_urls <- find_thread_urls(subreddit = "nba",
+                             period = "day")
 
+nba2_urls <- find_thread_urls(subreddit = "nbadiscussion",
+                              period = "day")
+
+# combine urls from both subreddits
+all_urls <- rbind(nba_urls, nba2_urls)
+
+# extract comments from these pages
+nba_comments <- get_thread_content(all_urls$url)
+
+# take a look at threads
+nba_comments$threads
+
+# take a look at comments
+nba_comments$comments
+
+# put comments in tidytext format - one word per row
+tidy_nba <- nba_comments$comments %>%
+  unnest_tokens(word, comment) %>%
+  anti_join(stop_words)
+
+# look at words and timestamps
+tidy_nba %>%
+  select(timestamp, word)
 ```
 
 [Successfully download Reddit comments (1 point) from multiple subreddits (0.5 points). Describe your data accurately (0.5 points).]
