@@ -1,7 +1,7 @@
 ---
 title: "Week 8 Problem Set"
-author: "Your Name Here! (github link here)"
-date: "Date goes Here!"
+author: "Jolie Barga (github link here)"
+date: "May 28, 2026"
 output: pdf_document
 ---
 
@@ -12,16 +12,32 @@ output: pdf_document
 
 [Successfully download stories using the Reddit API (1 point). Gather relevant data (0.5 points) and put it in tidytext format (0.5 points).]
 
-```{r q1, echo = TRUE}
+```{r q1, echo = TRUE, message=FALSE, warning=FALSE}
+library(guardianapi)
+library(tidytext)
+library(dplyr)
+library(magrittr)
 
+# Download Guardian articles about the World Cup
+guardian_wc <- gu_content('"World Cup"',
+                           from_date = "2026-05-01",
+                           to_date = "2026-05-28")
 
+# Put in tidytext format
+guardian_wc %<>%
+  unnest_tokens(word, body_text) %>%
+  anti_join(stop_words)
+
+guardian_wc %>%
+  select(web_publication_date, section_name, word) %>%
+  head()
 ```
 
 2. Use `RedditExtractoR` to download Reddit comments (or threads) for a topic of interest. Explain how you picked the topic and what we might learn from it. Be sure that you download data from multiple subreddits, and describe each briefly. __Commit your changes__.  
 
 
 
-```{r q2, echo = TRUE}
+```{r q2, echo = TRUE, message=FALSE, warning=FALSE}
 
 
 
@@ -33,7 +49,7 @@ output: pdf_document
 3. Choose two subreddits, and compare the frequencies of words between them. (Similar to what is done in Figure 8.3). __Commit your changes__. 
 
 
-```{r q3, echo = TRUE, message = FALSE}
+```{r q3, echo = TRUE, message = FALSE, warning=FALSE}
 
 
 
@@ -45,7 +61,7 @@ output: pdf_document
 4. Create a plot comparing sentiment across two or more subreddits. (Similar to what is done in Figure 8.5). __Commit your changes__. 
 
 
-```{r q4, echo = TRUE, message = FALSE}
+```{r q4, echo = TRUE, message = FALSE, warning=FALSE}
 
 
 ```
