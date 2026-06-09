@@ -335,18 +335,15 @@ ggplot(billboard_visibility_curve, aes(x = rank, y = cumulative_share)) +
 ```
 
 
-```{r billboard-load, echo = TRUE, message=FALSE, warning=FALSE}
-#####################################################
-## Public Billboard Hot 100 data
-#####################################################
+```{r billboard-rf-importance, echo = TRUE, message=FALSE, warning=FALSE}
+#This code builds a random forest model to predict whether selected reggaeton and Latin urban songs reached the Billboard Hot 100 Top 10. 
+#It starts by loading Billboard chart data, filtering for a set of Latin artists, and summarizing the weekly chart records into one row per artist-song case. 
+#The code then creates a Top 10 outcome variable and several predictors, including first charting year, weeks on chart, number of chart entries, collaboration status, and 
+# mainstream artist status. Finally, it fits a random forest model and plots variable importance to show which predictors mattered most for classifying Top 10 success.
 
 billboard_url <- "https://raw.githubusercontent.com/utdata/rwd-billboard-data/main/data-out/hot-100-current.csv"
 
 billboard <- read_csv(billboard_url)
-
-names(billboard)
-head(billboard)
-
 
 latin_artists <- c("Bad Bunny", "Karol G", "Daddy Yankee", "J Balvin",
                    "Nicky Jam", "Ozuna", "Arcangel", "Anuel AA",
@@ -360,8 +357,8 @@ billboard_latin <- data.frame()
 for (artist in latin_artists) {
   
   artist_rows <- billboard %>%
-  filter(str_detect(performer, regex(artist, ignore_case = TRUE))) %>%
-  mutate(artist = artist)
+    filter(str_detect(performer, regex(artist, ignore_case = TRUE))) %>%
+    mutate(artist = artist)
   
   billboard_latin <- bind_rows(billboard_latin, artist_rows)
 }
@@ -370,56 +367,24 @@ billboard_latin %<>%
   mutate(chart_week = as.Date(chart_week),
          year = as.numeric(format(chart_week, "%Y")))
 
-billboard_latin %>%
-  select(chart_week, year, title, performer, artist, current_week,
-         peak_pos, wks_on_chart) %>%
-  head()
-
 song_level <- billboard_latin %>%
   group_by(artist, title, performer) %>%
   summarize(first_year = min(year, na.rm = TRUE),
             best_peak_position = min(peak_pos, na.rm = TRUE),
             max_weeks_on_chart = max(wks_on_chart, na.rm = TRUE),
             chart_entries = n(),
-            .groups = "drop")
-
-song_level %<>%
-  mutate(
-    top_10 = ifelse(best_peak_position <= 10, "yes", "no"),
-    top_10 = factor(top_10, levels = c("no", "yes")),
-    collaboration = ifelse(str_detect(performer, "Featuring|Feat\\.|feat\\.|,|&| x | X "),
-                           "yes", "no"),
-    collaboration = as.factor(collaboration),
-    mainstream_artist = ifelse(artist %in% c("Bad Bunny", "Karol G",
-                                             "Daddy Yankee", "J Balvin",
-                                             "Nicky Jam", "Ozuna",
-                                             "Rauw Alejandro", "Maluma",
-                                             "Shakira", "Peso Pluma"),
-                               "yes", "no"),
-    mainstream_artist = as.factor(mainstream_artist)
-  )
-
-song_level
-
-nrow(song_level)
-
-song_level %>%
-  count(top_10)
-
-song_level %>%
-  count(artist) %>%
-  arrange(desc(n)) %>%
-  head(15)
-
-ggplot(song_level, aes(x = top_10, fill = top_10)) +
-  geom_bar() +
-  labs(title = "Distribution of Billboard Top 10 Outcomes",
-       subtitle = "Song-level outcome used for classification models",
-       x = "Reached Billboard Hot 100 Top 10",
-       y = "Number of Artist-Song Cases",
-       fill = "Top 10") +
-  theme_minimal(base_size = 13)
-
+            .groups = "drop") %>%
+  mutate(top_10 = ifelse(best_peak_position <= 10, "yes", "no"),
+         top_10 = factor(top_10, levels = c("no", "yes")),
+         collaboration = ifelse(str_detect(performer, "Featuring|Feat\\.|feat\\.|,|&| x | X "),
+                                "yes", "no"),
+         collaboration = as.factor(collaboration),
+         mainstream_artist = ifelse(artist %in% c("Bad Bunny", "Karol G",
+                                                  "Daddy Yankee", "J Balvin",
+                                                  "Nicky Jam", "Ozuna",
+                                                  "Rauw Alejandro"),
+                                    "yes", "no"),
+         mainstream_artist = as.factor(mainstream_artist))
 
 song_model_data <- song_level %>%
   select(top_10,
@@ -430,89 +395,8 @@ song_model_data <- song_level %>%
          mainstream_artist) %>%
   drop_na()
 
-song_model_data
-
-set.seed(123)
-
-song_folds <- vfold_cv(song_model_data,
-                       v = 5,
-                       strata = top_10)
-
-song_folds
-
 song_recipe <- recipe(top_10 ~ ., data = song_model_data) %>%
   step_dummy(all_nominal_predictors())
-
-log_model <-
-  logistic_reg() %>%
-  set_engine("glm") %>%
-  set_mode("classification")
-
-log_wflow <-
-  workflow() %>%
-  add_recipe(song_recipe) %>%
-  add_model(log_model)
-
-log_results <- fit_resamples(
-  log_wflow,
-  resamples = song_folds,
-  metrics = metric_set(accuracy, roc_auc),
-  control = control_resamples(save_pred = TRUE)
-)
-
-collect_metrics(log_results)
-
-rf_model <-
-  rand_forest(trees = 500) %>%
-  set_engine("ranger") %>%
-  set_mode("classification")
-
-rf_wflow <-
-  workflow() %>%
-  add_recipe(song_recipe) %>%
-  add_model(rf_model)
-
-rf_results <- fit_resamples(
-  rf_wflow,
-  resamples = song_folds,
-  metrics = metric_set(accuracy, roc_auc),
-  control = control_resamples(save_pred = TRUE)
-)
-
-collect_metrics(rf_results)
-
-log_metrics <- collect_metrics(log_results) %>%
-  mutate(model = "Logistic regression")
-
-rf_metrics <- collect_metrics(rf_results) %>%
-  mutate(model = "Random forest")
-
-song_model_metrics <- bind_rows(log_metrics, rf_metrics)
-
-song_model_metrics
-
-ggplot(song_model_metrics, aes(x = model, y = mean, fill = .metric)) +
-  geom_bar(stat = "identity", position = "dodge") +
-  labs(title = "Song-Level Model Performance",
-       subtitle = "5-fold cross-validation predicting Billboard Top 10 success",
-       x = "Model",
-       y = "Mean Metric Value",
-       fill = "Metric") +
-  theme_minimal(base_size = 13)
-
-rf_cv_preds <- collect_predictions(rf_results)
-
-conf_mat(rf_cv_preds,
-         truth = top_10,
-         estimate = .pred_class)
-
-roc_curve(rf_cv_preds,
-          truth = top_10,
-          .pred_yes) %>%
-  autoplot() +
-  labs(title = "Random Forest ROC Curve",
-       subtitle = "Cross-validated song-level model predicting Billboard Top 10 success") +
-  theme_minimal(base_size = 13)
 
 rf_model_importance <-
   rand_forest(trees = 500) %>%
