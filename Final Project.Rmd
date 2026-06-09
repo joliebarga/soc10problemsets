@@ -1,0 +1,548 @@
+---
+title: "Final Project"
+author: "Jolie Barga https://github.com/joliebarga/soc10problemsets"
+date: "June 22026"
+output: pdf_document
+---
+
+
+
+```{r prep, echo = TRUE, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(magrittr)
+library(gtrendsR)
+library(ggplot2)
+library(sf)
+library(gtrendsR)
+library(tigris)
+library(tidymodels)
+library(igraph)
+theme_set(theme_minimal(base_size = 13))
+```
+
+```{r google trends, echo = TRUE, message=FALSE, warning=FALSE}
+# Here I use section uses Google Trends as a digital trace of cultural attention.
+reggaeton_trends <- gtrends(c("reggaeton"),
+                            geo = "US",
+                            time = "all")
+reggaeton_time <- reggaeton_trends$interest_over_time
+reggaeton_time %<>%
+  mutate(hits = ifelse(hits == "<1", "0", hits),
+         hits = as.numeric(hits))
+ggplot(reggaeton_time, aes(x = date, y = hits)) +
+  geom_line(alpha = 0.7) +
+  # this creates a smooth curve to follow to see google search trends easier
+  geom_smooth(se = FALSE, method = "loess") +
+  labs(title = "Reggaeton Search Interest Rose Unevenly Over Time",
+       subtitle = "Google Trends data, United States, 2004-present",
+       x = "Year",
+       y = "Relative Search Interest",
+       caption = "Note: Google Trends values are relative, where 100 represents peak interest in the selected period.") +
+  theme_minimal(base_size = 13)
+```
+
+
+
+
+
+```{r search interest, echo = TRUE, message=FALSE, warning=FALSE}
+# Reggaeton search interest with major cultural moments
+# This adds important cultural moments to the time-series graph.
+# These events of different top song release dates help connect changes in the data to real-world music history.
+events <- data.frame(
+  event_date = as.Date(c("2004-07-13", "2017-01-12", "2020-02-29",
+                         "2022-05-06", "2023-02-24")),
+  event = c("Gasolina", "Despacito", "YHLQMDLG",
+            "Un Verano Sin Ti", "Mañana Será Bonito")
+)
+ggplot(reggaeton_time, aes(x = date, y = hits)) +
+  geom_line(alpha = 0.8) +
+  geom_vline(data = events,
+             aes(xintercept = event_date),
+             linetype = "dashed",
+             alpha = 0.6) +
+  # I worked to specifify the look of this graph to be easiest readible to viewers
+  geom_text(data = events,
+            aes(x = event_date, y = 95, label = event),
+            angle = 90,
+            vjust = 1.2,
+            hjust = 1,
+            size = 3) +
+  labs(title = "Major Cultural Moments Created Visibility Shocks",
+       subtitle = "Key songs and albums are marked on the Google Trends timeline",
+       x = "Year",
+       y = "Relative Search Interest") +
+  theme_minimal(base_size = 13)
+```
+
+
+```{r state, echo = TRUE, message=FALSE, warning=FALSE}
+# 4. Google Trends data by state
+# This section uses Google Trends geography data.
+# I use the past 5 years because Google Trends geographic data is more stable
+# and easier to interpret over a recent time period.
+
+reggaeton_geo <- gtrends(c("reggaeton"),
+                         geo = "US",
+                         time = "today+5-y")
+
+geo_state <- reggaeton_geo$interest_by_region
+
+geo_state %<>%
+  rename(NAME = location) %>%
+  mutate(hits = ifelse(hits == "<1", "0", hits),
+         hits = as.numeric(hits))
+
+head(geo_state)
+```
+
+
+```{r map, echo = TRUE, message=FALSE, warning=FALSE}
+## 5. Map reggaeton search interest by state
+
+# This follows the spatial analysis skills I learned from class using tigris and ggplot.
+# The map shows where reggaeton search interest is highest across the U.S.
+
+states_data <- states(cb = TRUE)
+
+#remove these states to solely include mainland states
+states_data %<>%
+  filter(!STUSPS %in% c("AK", "HI", "PR"))
+
+states_reggaeton <- left_join(states_data, geo_state, by = "NAME")
+
+ggplot(states_reggaeton) +
+  geom_sf(aes(fill = hits), color = "white", linewidth = 0.1) +
+  coord_sf(xlim = c(-125, -66),
+           ylim = c(24, 50),
+           expand = FALSE) +
+  scale_fill_viridis_c(option = "magma", na.value = "gray90") +
+  labs(title = "Reggaeton Search Interest by State",
+       subtitle = "Google Trends data, past 5 years",
+       fill = "Search\nInterest",
+       caption = "Alaska, Hawaii, and Puerto Rico removed for visual clarity.") +
+  theme_minimal(base_size = 13) +
+  theme(axis.text = element_blank(),
+        axis.title = element_blank(),
+        axis.ticks = element_blank(),
+        panel.grid = element_blank(),
+        plot.caption = element_text(hjust = 0))
+```
+
+
+
+
+```{r net, echo = TRUE, message=FALSE, warning=FALSE}
+## Artist collaboration network
+# This section is my a small hand-coded collaboration dataset.
+# It follows the same igraph approach from the class network problem set.
+# The point is to show social/network connections between artists.
+
+collabs <- data.frame(
+  artist_1 = c("Bad Bunny", "Bad Bunny", "Bad Bunny", "J Balvin",
+               "Karol G", "Daddy Yankee", "Daddy Yankee",
+               "J Balvin", "Nicky Jam", "Ozuna"),
+  artist_2 = c("J Balvin", "Daddy Yankee", "Karol G", "Daddy Yankee",
+               "Nicki Minaj", "Nicky Jam", "Ozuna",
+               "Willy William", "Daddy Yankee", "Bad Bunny")
+)
+
+reggaeton_net <- graph_from_data_frame(collabs, directed = FALSE)
+
+V(reggaeton_net)$degree <- degree(reggaeton_net)
+
+plot(reggaeton_net,
+     vertex.size = V(reggaeton_net)$degree * 8 + 10,
+     vertex.color = "lavender",
+     vertex.frame.color = NA,
+     vertex.label.cex = .8,
+     edge.curved = .05,
+     edge.width = 1,
+     edge.color = "gray50",
+     main = "Reggaeton Collaboration Network")
+
+degree(reggaeton_net)
+```
+
+
+```{r dataset, echo = TRUE, message=FALSE, warning=FALSE}
+artist_data <- data.frame(
+  artist = c("Bad Bunny", "Karol G", "Daddy Yankee", "J Balvin",
+             "Nicky Jam", "Ozuna", "Ñengo Flow", "De La Ghetto",
+             "Jowell y Randy", "Arcangel"),
+  google_peak = c(100, 85, 70, 75, 55, 50, 18, 20, 15, 30),
+  average_google_interest = c(35, 25, 20, 22, 15, 14, 5, 6, 4, 8),
+  collaborations = c(25, 18, 30, 28, 22, 20, 8, 10, 7, 12),
+  billboard_entries = c(45, 30, 20, 25, 12, 10, 1, 2, 1, 4),
+  years_active = c(8, 12, 25, 18, 18, 14, 20, 20, 22, 20),
+  mainstream = c("yes", "yes", "yes", "yes", "yes", "yes",
+                 "no", "no", "no", "no")
+)
+
+artist_data %<>%
+  mutate(mainstream = factor(mainstream, levels = c("yes", "no")))
+
+artist_data
+
+ggplot(artist_data, aes(x = reorder(artist, google_peak),
+                        y = google_peak,
+                        fill = mainstream)) +
+  geom_bar(stat = "identity") +
+  coord_flip() +
+  labs(title = "Google Search Interest by Mainstream Classification",
+       subtitle = "Positive and negative cases in reggaeton popularity",
+       x = "Artist",
+       y = "Peak Google Search Interest",
+       fill = "Mainstream") +
+  theme_minimal()
+```
+
+
+
+
+```{r reggaeton-periods, echo = TRUE, message=FALSE, warning=FALSE}
+# This public GitHub dataset archives Billboard Hot 100 chart data.
+# I use it as a second data source because Google Trends measures search attention,
+# while Billboard measures mainstream chart visibility.
+
+billboard_url <- "https://raw.githubusercontent.com/utdata/rwd-billboard-data/main/data-out/hot-100-current.csv"
+
+billboard <- read_csv(billboard_url)
+
+head(billboard)
+names(billboard)
+
+```
+```{r billboard-clean, echo = TRUE, message=FALSE, warning=FALSE}
+## Clean Billboard data for reggaeton artist cases
+
+reggaeton_artists <- c("Bad Bunny", "Karol G", "Daddy Yankee", "J Balvin",
+                       "Nicky Jam", "Ozuna", "Ñengo Flow", "De La Ghetto",
+                       "Jowell y Randy", "Arcangel")
+
+billboard_reggaeton <- billboard %>%
+  filter(str_detect(performer, str_c(reggaeton_artists, collapse = "|"))) %>%
+  mutate(year = as.numeric(format(as.Date(chart_week), "%Y")))
+
+billboard_reggaeton %>%
+  select(chart_week, year, title, performer, current_week, peak_pos, wks_on_chart) %>%
+  head()
+
+billboard_artist_summary <- data.frame()
+
+for (artist in reggaeton_artists) {
+  
+  artist_rows <- billboard %>%
+    filter(str_detect(performer, artist))
+  
+  artist_summary <- data.frame(
+    artist = artist,
+    billboard_entries = nrow(artist_rows),
+    unique_songs = n_distinct(artist_rows$title),
+    best_peak_position = min(artist_rows$peak_pos, na.rm = TRUE),
+    total_weeks_on_chart = sum(artist_rows$wks_on_chart, na.rm = TRUE)
+  )
+  
+  billboard_artist_summary <- bind_rows(billboard_artist_summary,
+                                        artist_summary)
+}
+
+billboard_artist_summary %<>%
+  mutate(best_peak_position = ifelse(is.infinite(best_peak_position),
+                                     NA,
+                                     best_peak_position),
+         mainstream = ifelse(artist %in% c("Bad Bunny", "Karol G",
+                                           "Daddy Yankee", "J Balvin",
+                                           "Nicky Jam", "Ozuna"),
+                             "yes", "no"))
+
+billboard_artist_summary
+
+```
+
+```{r reggaeton-periods, echo = TRUE, message=FALSE, warning=FALSE}
+
+# This uses Reggaeton Music in Billboard Hot 100 to show growth of the genre overtime 
+billboard_yearly <- billboard_reggaeton %>%
+  group_by(year) %>%
+  summarize(entries = n(),
+            unique_songs = n_distinct(title))
+
+ggplot(billboard_yearly, aes(x = year, y = unique_songs)) +
+  geom_line(size = 1) +
+  geom_point() +
+  labs(title = "Reggaeton-Related Billboard Hot 100 Visibility Over Time",
+       subtitle = "Number of unique songs by selected reggaeton artists appearing each year",
+       x = "Year",
+       y = "Unique Hot 100 Songs") +
+  theme_minimal(base_size = 13)
+```
+
+
+
+
+```{r reggaeton-periods, echo = TRUE, message=FALSE, warning=FALSE}
+
+
+# The first graph, “Billboard Hot 100 Visibility by Artist,” compares reggaeton and Latin urban artists based on how many distinct songs they have had appear on the 
+# Billboard Hot 100. Since the artists are ranked by their number of unique Hot 100 songs, the graph makes it easy to see which artists have had the most mainstream chart
+# visibility. I chose for  fill color separates artists classified as mainstream from those classified as less mainstream, showing not only which artists appear most often on the
+# chart, but also how Billboard visibility is distributed across different levels of mainstream recognition. Overall, this graph highlights that Hot 100 visibility is not
+# evenly spread across all artists, but is concentrated among a smaller group of highly visible performers.
+billboard_yearly <- billboard_reggaeton %>%
+  group_by(year) %>%
+  summarize(entries = n(),
+            unique_songs = n_distinct(title))
+
+
+ggplot(billboard_artist_summary,
+       aes(x = reorder(artist, unique_songs),
+           y = unique_songs,
+           fill = mainstream)) +
+  geom_bar(stat = "identity") +
+  coord_flip() +
+  labs(title = "Billboard Hot 100 Visibility by Artist",
+       subtitle = "Distinct songs appearing on the Billboard Hot 100",
+       x = "Artist",
+       y = "Unique Hot 100 Songs",
+       fill = "Mainstream") +
+  theme_minimal(base_size = 13)
+
+# The second graph, “Billboard Visibility Is Concentrated Among a Few
+# Artists,” shows the cumulative share of Billboard Hot 100 visibility by artist rank. Artists are ordered from highest to lowest visibility, and the curve shows how quickly
+# the total share of unique Hot 100 songs accumulates as more artists are added. A steep rise at the beginning of the curve would mean that the top-ranked artists account for
+# a large portion of all Billboard visibility, while a flatter curve would suggest a more even distribution. In this case, the graph is meant to demonstrate that Billboard
+# success in reggaeton is highly concentrated, with a relatively small number of artists making up a large share of the genre’s mainstream Hot 100 presence.
+
+
+billboard_visibility_curve <- billboard_artist_summary %>%
+  arrange(desc(unique_songs)) %>%
+  mutate(rank = row_number(),
+         total_visibility = sum(unique_songs),
+         cumulative_visibility = cumsum(unique_songs),
+         cumulative_share = cumulative_visibility / total_visibility)
+
+ggplot(billboard_visibility_curve, aes(x = rank, y = cumulative_share)) +
+  geom_line(size = 1) +
+  geom_point() +
+  scale_y_continuous(labels = scales::percent) +
+  labs(title = "Billboard Visibility Is Concentrated Among a Few Artists",
+       subtitle = "Cumulative share of unique Hot 100 songs by artist rank",
+       x = "Artist Rank by Billboard Visibility",
+       y = "Cumulative Share of Billboard Visibility") +
+  theme_minimal(base_size = 13)
+
+```
+
+
+```{r billboard-load, echo = TRUE, message=FALSE, warning=FALSE}
+#####################################################
+## Public Billboard Hot 100 data
+#####################################################
+
+billboard_url <- "https://raw.githubusercontent.com/utdata/rwd-billboard-data/main/data-out/hot-100-current.csv"
+
+billboard <- read_csv(billboard_url)
+
+names(billboard)
+head(billboard)
+
+
+latin_artists <- c("Bad Bunny", "Karol G", "Daddy Yankee", "J Balvin",
+                   "Nicky Jam", "Ozuna", "Arcangel", "Anuel AA",
+                   "Rauw Alejandro", "Farruko", "Feid", "Myke Towers",
+                   "Wisin", "Yandel", "Don Omar", "Tego Calderon",
+                   "Chencho Corleone", "Plan B", "Sech",
+                   "Natti Natasha", "Eladio Carrion", "Mora")
+
+billboard_latin <- data.frame()
+
+for (artist in latin_artists) {
+  
+  artist_rows <- billboard %>%
+  filter(str_detect(performer, regex(artist, ignore_case = TRUE))) %>%
+  mutate(artist = artist)
+  
+  billboard_latin <- bind_rows(billboard_latin, artist_rows)
+}
+
+billboard_latin %<>%
+  mutate(chart_week = as.Date(chart_week),
+         year = as.numeric(format(chart_week, "%Y")))
+
+billboard_latin %>%
+  select(chart_week, year, title, performer, artist, current_week,
+         peak_pos, wks_on_chart) %>%
+  head()
+
+song_level <- billboard_latin %>%
+  group_by(artist, title, performer) %>%
+  summarize(first_year = min(year, na.rm = TRUE),
+            best_peak_position = min(peak_pos, na.rm = TRUE),
+            max_weeks_on_chart = max(wks_on_chart, na.rm = TRUE),
+            chart_entries = n(),
+            .groups = "drop")
+
+song_level %<>%
+  mutate(
+    top_10 = ifelse(best_peak_position <= 10, "yes", "no"),
+    top_10 = factor(top_10, levels = c("no", "yes")),
+    collaboration = ifelse(str_detect(performer, "Featuring|Feat\\.|feat\\.|,|&| x | X "),
+                           "yes", "no"),
+    collaboration = as.factor(collaboration),
+    mainstream_artist = ifelse(artist %in% c("Bad Bunny", "Karol G",
+                                             "Daddy Yankee", "J Balvin",
+                                             "Nicky Jam", "Ozuna",
+                                             "Rauw Alejandro", "Maluma",
+                                             "Shakira", "Peso Pluma"),
+                               "yes", "no"),
+    mainstream_artist = as.factor(mainstream_artist)
+  )
+
+song_level
+
+nrow(song_level)
+
+song_level %>%
+  count(top_10)
+
+song_level %>%
+  count(artist) %>%
+  arrange(desc(n)) %>%
+  head(15)
+
+ggplot(song_level, aes(x = top_10, fill = top_10)) +
+  geom_bar() +
+  labs(title = "Distribution of Billboard Top 10 Outcomes",
+       subtitle = "Song-level outcome used for classification models",
+       x = "Reached Billboard Hot 100 Top 10",
+       y = "Number of Artist-Song Cases",
+       fill = "Top 10") +
+  theme_minimal(base_size = 13)
+
+
+song_model_data <- song_level %>%
+  select(top_10,
+         first_year,
+         max_weeks_on_chart,
+         chart_entries,
+         collaboration,
+         mainstream_artist) %>%
+  drop_na()
+
+song_model_data
+
+set.seed(123)
+
+song_folds <- vfold_cv(song_model_data,
+                       v = 5,
+                       strata = top_10)
+
+song_folds
+
+song_recipe <- recipe(top_10 ~ ., data = song_model_data) %>%
+  step_dummy(all_nominal_predictors())
+
+log_model <-
+  logistic_reg() %>%
+  set_engine("glm") %>%
+  set_mode("classification")
+
+log_wflow <-
+  workflow() %>%
+  add_recipe(song_recipe) %>%
+  add_model(log_model)
+
+log_results <- fit_resamples(
+  log_wflow,
+  resamples = song_folds,
+  metrics = metric_set(accuracy, roc_auc),
+  control = control_resamples(save_pred = TRUE)
+)
+
+collect_metrics(log_results)
+
+rf_model <-
+  rand_forest(trees = 500) %>%
+  set_engine("ranger") %>%
+  set_mode("classification")
+
+rf_wflow <-
+  workflow() %>%
+  add_recipe(song_recipe) %>%
+  add_model(rf_model)
+
+rf_results <- fit_resamples(
+  rf_wflow,
+  resamples = song_folds,
+  metrics = metric_set(accuracy, roc_auc),
+  control = control_resamples(save_pred = TRUE)
+)
+
+collect_metrics(rf_results)
+
+log_metrics <- collect_metrics(log_results) %>%
+  mutate(model = "Logistic regression")
+
+rf_metrics <- collect_metrics(rf_results) %>%
+  mutate(model = "Random forest")
+
+song_model_metrics <- bind_rows(log_metrics, rf_metrics)
+
+song_model_metrics
+
+ggplot(song_model_metrics, aes(x = model, y = mean, fill = .metric)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "Song-Level Model Performance",
+       subtitle = "5-fold cross-validation predicting Billboard Top 10 success",
+       x = "Model",
+       y = "Mean Metric Value",
+       fill = "Metric") +
+  theme_minimal(base_size = 13)
+
+rf_cv_preds <- collect_predictions(rf_results)
+
+conf_mat(rf_cv_preds,
+         truth = top_10,
+         estimate = .pred_class)
+
+roc_curve(rf_cv_preds,
+          truth = top_10,
+          .pred_yes) %>%
+  autoplot() +
+  labs(title = "Random Forest ROC Curve",
+       subtitle = "Cross-validated song-level model predicting Billboard Top 10 success") +
+  theme_minimal(base_size = 13)
+
+rf_model_importance <-
+  rand_forest(trees = 500) %>%
+  set_engine("ranger", importance = "impurity") %>%
+  set_mode("classification")
+
+rf_wflow_importance <-
+  workflow() %>%
+  add_recipe(song_recipe) %>%
+  add_model(rf_model_importance)
+
+rf_fit_importance <- fit(rf_wflow_importance,
+                         data = song_model_data)
+
+rf_importance <- rf_fit_importance %>%
+  extract_fit_parsnip() %>%
+  pluck("fit", "variable.importance") %>%
+  as.data.frame()
+
+rf_importance$variable <- rownames(rf_importance)
+
+names(rf_importance)[1] <- "importance"
+
+ggplot(rf_importance, aes(x = reorder(variable, importance),
+                          y = importance)) +
+  geom_bar(stat = "identity") +
+  coord_flip() +
+  labs(title = "Random Forest Variable Importance",
+       subtitle = "Which features mattered most for classifying Top 10 success?",
+       x = "Predictor",
+       y = "Importance") +
+  theme_minimal(base_size = 13)
+```
