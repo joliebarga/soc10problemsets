@@ -33,7 +33,7 @@ reggaeton_time %<>%
          hits = as.numeric(hits))
 ggplot(reggaeton_time, aes(x = date, y = hits)) +
   geom_line(alpha = 0.7) +
-  # this creates a smooth curve to follow to see google search trends easier
+  # The LOESS creates a smooth curve to follow to see google search trends easier
   geom_smooth(se = FALSE, method = "loess") +
   labs(title = "Reggaeton Search Interest Rose Unevenly Over Time",
        subtitle = "Google Trends data, United States, 2004-present",
@@ -47,7 +47,7 @@ ggplot(reggaeton_time, aes(x = date, y = hits)) +
 
 
 
-```{r search interest, echo = TRUE, message=FALSE, warning=FALSE}
+```{r search-interest-events, echo = TRUE, message=FALSE, warning=FALSE}
 # Reggaeton search interest with major cultural moments
 # This adds important cultural moments to the time-series graph.
 # These events of different top song release dates help connect changes in the data to real-world music history.
@@ -78,11 +78,10 @@ ggplot(reggaeton_time, aes(x = date, y = hits)) +
 ```
 
 
-```{r state, echo = TRUE, message=FALSE, warning=FALSE}
-# 4. Google Trends data by state
+```{r by-state-search, echo = TRUE, message=FALSE, warning=FALSE}
+# Google Trends data by state
 # This section uses Google Trends geography data.
-# I use the past 5 years because Google Trends geographic data is more stable
-# and easier to interpret over a recent time period.
+# I use the past 5 years because Google Trends geographic data is more stable and easier to interpret over a recent time period.
 
 reggaeton_geo <- gtrends(c("reggaeton"),
                          geo = "US",
@@ -100,8 +99,7 @@ head(geo_state)
 
 
 ```{r map, echo = TRUE, message=FALSE, warning=FALSE}
-## 5. Map reggaeton search interest by state
-
+# Map og reggaeton search interest by state
 # This follows the spatial analysis skills I learned from class using tigris and ggplot.
 # The map shows where reggaeton search interest is highest across the U.S.
 
@@ -167,21 +165,20 @@ degree(reggaeton_net)
 ```
 
 
-```{r dataset, echo = TRUE, message=FALSE, warning=FALSE}
-artist_data <- data.frame(
-  artist = c("Bad Bunny", "Karol G", "Daddy Yankee", "J Balvin",
-             "Nicky Jam", "Ozuna", "Ñengo Flow", "De La Ghetto",
-             "Jowell y Randy", "Arcangel"),
-  google_peak = c(100, 85, 70, 75, 55, 50, 18, 20, 15, 30),
-  average_google_interest = c(35, 25, 20, 22, 15, 14, 5, 6, 4, 8),
-  collaborations = c(25, 18, 30, 28, 22, 20, 8, 10, 7, 12),
-  billboard_entries = c(45, 30, 20, 25, 12, 10, 1, 2, 1, 4),
-  years_active = c(8, 12, 25, 18, 18, 14, 20, 20, 22, 20),
+```{r artist-case-data, echo = TRUE, message=FALSE, warning=FALSE}
+# This section creates the artist-level case dataset used for the positive/negative case comparison.
+# The variables compare Billboard visibility, collaboration activity, and peak Google Trends attention.
+
+artist_data <- tibble(
+  artist = c("Bad Bunny", "Karol G", "J Balvin", "Daddy Yankee",
+             "Ozuna", "Nicky Jam", "Arcangel", "De La Ghetto",
+             "Ñengo Flow", "Jowell y Randy"),
+  billboard_entries = c(102, 34, 18, 17, 20, 12, 2, 1, 1, 0),
+  collaborations = c(28, 19, 22, 16, 21, 14, 9, 8, 6, 7),
+  google_peak = c(100, 78, 60, 52, 55, 48, 24, 20, 15, 14),
   mainstream = c("yes", "yes", "yes", "yes", "yes", "yes",
                  "no", "no", "no", "no")
-)
-
-artist_data %<>%
+) %>%
   mutate(mainstream = factor(mainstream, levels = c("yes", "no")))
 
 artist_data
@@ -189,16 +186,14 @@ artist_data
 ggplot(artist_data, aes(x = reorder(artist, google_peak),
                         y = google_peak,
                         fill = mainstream)) +
-  geom_bar(stat = "identity") +
+  geom_col() +
   coord_flip() +
   labs(title = "Google Search Interest by Mainstream Classification",
        subtitle = "Positive and negative cases in reggaeton popularity",
        x = "Artist",
-       y = "Peak Google Search Interest",
-       fill = "Mainstream") +
-  theme_minimal()
+       y = "Peak Google Trends Interest",
+       fill = "Mainstream")
 ```
-
 
 
 
@@ -216,7 +211,8 @@ names(billboard)
 
 ```
 ```{r billboard-clean, echo = TRUE, message=FALSE, warning=FALSE}
-## Clean Billboard data for reggaeton artist cases
+# Clean Billboard data for the selected reggaeton and Latin urbano artist cases.
+# The Billboard file has one row per song per chart week, so I collapse it to artist-level visibility measures.
 
 reggaeton_artists <- c("Bad Bunny", "Karol G", "Daddy Yankee", "J Balvin",
                        "Nicky Jam", "Ozuna", "Ñengo Flow", "De La Ghetto",
