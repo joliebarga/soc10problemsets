@@ -1,7 +1,7 @@
 ---
 title: "Final Project"
 author: "Jolie Barga https://github.com/joliebarga/soc10problemsets"
-date: "June 22026"
+date: "June 2, 2026"
 output: pdf_document
 ---
 
@@ -21,7 +21,9 @@ theme_set(theme_minimal(base_size = 13))
 ```
 
 ```{r google trends, echo = TRUE, message=FALSE, warning=FALSE}
-# Here I use section uses Google Trends as a digital trace of cultural attention.
+# This section uses Google Trends as a digital trace of cultural attention.
+# The values are relative, with 100 representing peak search interest in the selected time period.
+
 reggaeton_trends <- gtrends(c("reggaeton"),
                             geo = "US",
                             time = "all")
@@ -200,7 +202,7 @@ ggplot(artist_data, aes(x = reorder(artist, google_peak),
 
 
 
-```{r reggaeton-periods, echo = TRUE, message=FALSE, warning=FALSE}
+```{r load-billboard, echo=TRUE, message=FALSE, warning=FALSE}
 # This public GitHub dataset archives Billboard Hot 100 chart data.
 # I use it as a second data source because Google Trends measures search attention,
 # while Billboard measures mainstream chart visibility.
@@ -260,7 +262,7 @@ billboard_artist_summary
 
 ```
 
-```{r reggaeton-periods, echo = TRUE, message=FALSE, warning=FALSE}
+```{r billboard-over-time, echo=TRUE, message=FALSE, warning=FALSE}
 
 # This uses Reggaeton Music in Billboard Hot 100 to show growth of the genre overtime 
 billboard_yearly <- billboard_reggaeton %>%
@@ -281,7 +283,7 @@ ggplot(billboard_yearly, aes(x = year, y = unique_songs)) +
 
 
 
-```{r reggaeton-periods, echo = TRUE, message=FALSE, warning=FALSE}
+```{r billboard-artist-visibility, echo=TRUE, message=FALSE, warning=FALSE}
 
 
 # The first graph, “Billboard Hot 100 Visibility by Artist,” compares reggaeton and Latin urban artists based on how many distinct songs they have had appear on the 
